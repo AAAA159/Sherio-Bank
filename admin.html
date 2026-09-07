@@ -1,1 +1,734 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shiro Bank — لوحة الأدمن</title>
+<meta name="theme-color" content="#00d4ff">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#04070c; --surface:#0a0f18; --surface2:#0e1520;
+  --cyan:#00d4ff; --cyan-dim:rgba(0,212,255,.12);
+  --gold:#d4af37; --gold-dim:rgba(212,175,55,.12);
+  --text:#f0f5fa; --muted:#7a8a9e;
+  --border:rgba(0,212,255,.18); --border2:rgba(255,255,255,.06);
+  --success:#2ed573; --danger:#ff4757; --warning:#fbbf24;
+  --radius:14px; --ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Cairo,sans-serif;min-height:100vh;line-height:1.6}
+button,input,select,textarea{font:inherit;border:none;outline:none;background:none;color:inherit}
+.wrap{width:min(1120px,calc(100% - 28px));margin:0 auto}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 50% 30% at 90% 0%,var(--cyan-dim),transparent),
+             radial-gradient(ellipse 40% 25% at 5% 100%,var(--gold-dim),transparent);opacity:.55}
 
+.topbar{position:sticky;top:0;z-index:100;background:rgba(4,7,12,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border2);padding:11px 0}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;direction:ltr}
+.crest{width:34px;height:34px;border:1.5px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--cyan);font-size:15px;box-shadow:0 0 14px var(--cyan-dim)}
+.brand strong{font:700 14px 'Space Grotesk';letter-spacing:.1em}
+.brand small{display:block;font:10px 'Space Mono';color:var(--gold);letter-spacing:.08em}
+.badge-admin{background:linear-gradient(135deg,var(--gold),#b8942a);color:#000;font-size:10px;font-weight:800;padding:4px 12px;border-radius:100px}
+
+.nav-tabs{display:flex;gap:4px;overflow-x:auto;padding:12px 0 6px;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{flex-shrink:0;padding:8px 14px;border-radius:100px;font-size:12px;font-weight:600;color:var(--muted);border:1px solid transparent;cursor:pointer;transition:.25s;white-space:nowrap}
+.nav-tab:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.nav-tab.active{background:var(--cyan-dim);color:var(--cyan);border-color:var(--border)}
+.nav-tab .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--danger);margin-right:4px;vertical-align:middle}
+
+.section{display:none;padding:8px 0 50px;position:relative;z-index:2}
+.section.active{display:block}
+.page-title{font-size:20px;font-weight:800;margin-bottom:3px}
+.page-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;text-align:center}
+.stat-val{font:700 22px 'Space Grotesk';color:var(--cyan);display:block}
+.stat-label{font-size:11px;color:var(--muted)}
+
+.panel{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.panel-title{font-size:14px;font-weight:700;margin-bottom:12px}
+
+.search-bar{margin-bottom:12px}
+.search-bar input{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:11px;padding:11px 14px;font-size:13px}
+.search-bar input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
+
+.member-row,.order-row{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px;border-radius:12px;border:1px solid var(--border2);margin-bottom:8px;transition:.2s
+}
+.member-row:hover,.order-row:hover{border-color:var(--border);background:rgba(255,255,255,.02)}
+.member-row.frozen{opacity:.75;border-color:rgba(251,191,36,.3)}
+.member-row.closed{opacity:.55;border-color:rgba(255,71,87,.3)}
+.m-left{display:flex;align-items:center;gap:11px;flex:1;min-width:180px}
+.m-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#0891b2);display:grid;place-items:center;font:700 13px 'Space Grotesk';color:#000;flex-shrink:0}
+.m-name{font-size:13px;font-weight:600}
+.m-meta{font-size:11px;color:var(--muted)}
+.m-balance{font:600 13px 'Space Grotesk';color:var(--cyan);direction:ltr}
+.st{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px}
+.st.active{background:rgba(46,213,115,.12);color:var(--success)}
+.st.frozen{background:rgba(251,191,36,.12);color:var(--warning)}
+.st.closed{background:rgba(255,71,87,.12);color:var(--danger)}
+.st.pending{background:rgba(251,191,36,.12);color:var(--warning)}
+.st.approved,.st.done{background:rgba(46,213,115,.12);color:var(--success)}
+.st.rejected{background:rgba(255,71,87,.12);color:var(--danger)}
+
+.actions{display:flex;gap:5px;flex-wrap:wrap}
+.btn-x{padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border2);color:var(--muted);transition:.2s}
+.btn-x:hover{border-color:var(--border);color:var(--cyan)}
+.btn-x.danger:hover{border-color:var(--danger);color:var(--danger)}
+.btn-x.warn:hover{border-color:var(--warning);color:var(--warning)}
+.btn-x.ok:hover{border-color:var(--success);color:var(--success)}
+
+.form-group{margin-bottom:11px}
+.form-label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500}
+.form-input,.form-select,.form-textarea{
+  width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border2);
+  border-radius:11px;padding:10px 12px;font-size:13px;transition:.25s
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
+.form-textarea{min-height:70px;resize:vertical}
+.form-select{appearance:auto}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;border-radius:11px;font-weight:700;font-size:13px;cursor:pointer;transition:.3s;width:100%}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),#0891b2);color:#000}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-warn{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted);margin-top:6px}
+
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;visibility:hidden;transition:.35s}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;width:100%;max-width:420px;padding:20px;transform:translateY(16px) scale(.96);transition:.35s;max-height:90vh;overflow-y:auto}
+.modal-overlay.open .modal{transform:none}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.modal-title{font-size:16px;font-weight:700}
+.modal-close{width:32px;height:32px;border-radius:9px;border:1px solid var(--border2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.modal-close:hover{border-color:var(--danger);color:var(--danger)}
+
+.rules-box{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:12px;font-size:12px;color:var(--muted);line-height:1.75}
+.rules-box b{color:var(--text)}
+.log-item,.warn-item{padding:10px 0;border-bottom:1px solid var(--border2);font-size:12px}
+.log-item:last-child,.warn-item:last-child{border-bottom:none}
+.log-action{font-weight:600;margin-bottom:2px}
+.log-meta{color:var(--muted);font-size:11px}
+
+.ticket{background:linear-gradient(145deg,#122536,#0c1a28);border:1px solid var(--border);border-radius:16px;padding:20px;margin:12px 0;position:relative;overflow:hidden}
+.ticket::before{content:'城';position:absolute;font-size:80px;opacity:.04;left:10px;bottom:-20px}
+.ticket-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;direction:ltr}
+.ticket-logo{font:700 12px 'Space Grotesk';letter-spacing:.12em;color:var(--gold)}
+.ticket-id{font:600 11px 'Space Mono';color:var(--cyan)}
+.ticket-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px}
+.ticket-row span{color:var(--muted);font-size:11px}
+.ticket-stamp{margin-top:12px;text-align:center;font-size:11px;color:var(--success);font-weight:700}
+
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(70px);background:#0f1724;border:1px solid var(--border);border-radius:12px;padding:11px 16px;font-size:12px;display:flex;align-items:center;gap:8px;z-index:300;opacity:0;transition:.4s;max-width:92%}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast-icon{width:20px;height:20px;border-radius:50%;background:var(--success);color:#000;display:grid;place-items:center;font-size:11px;font-weight:700}
+
+.loading{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.loading.hide{display:none}
+
+@media(max-width:700px){.stats-row{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div style="font:700 16px 'Space Grotesk';color:var(--cyan);letter-spacing:.15em">SHIRO ADMIN</div>
+  <div style="font-size:12px;color:var(--muted)">جاري التحقق...</div>
+</div>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <div class="crest">城</div>
+      <div><strong>SHIRO BANK</strong><small>ADMIN PANEL</small></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="badge-admin">ADMIN</span>
+      <button class="btn-x" onclick="location.href='dashboard.html'">العودة</button>
+      <button class="btn-x danger" id="logoutBtn">خروج</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-sec="home">نظرة عامة</button>
+    <button class="nav-tab" data-sec="members">الأعضاء</button>
+    <button class="nav-tab" data-sec="points">النقاط</button>
+    <button class="nav-tab" data-sec="warnings">الإنذارات</button>
+    <button class="nav-tab" data-sec="rules">القواعد</button>
+    <button class="nav-tab" data-sec="orders">الطلبات <span class="dot" id="ordersDot" style="display:none"></span></button>
+    <button class="nav-tab" data-sec="logs">السجل</button>
+  </div>
+</div>
+
+<section class="section active" id="sec-home">
+  <div class="wrap">
+    <h1 class="page-title">لوحة الأدمن</h1>
+    <p class="page-sub">البيانات مباشرة من Firebase</p>
+    <div class="stats-row">
+      <div class="stat-box"><span class="stat-val" id="sTotal">0</span><span class="stat-label">أعضاء</span></div>
+      <div class="stat-box"><span class="stat-val" id="sActive">0</span><span class="stat-label">نشط</span></div>
+      <div class="stat-box"><span class="stat-val" id="sPending">0</span><span class="stat-label">طلبات معلقة</span></div>
+      <div class="stat-box"><span class="stat-val" id="sWarn">0</span><span class="stat-label">إنذارات</span></div>
+    </div>
+    <div class="panel"><div class="panel-title">آخر العمليات</div><div id="homeLogs"></div></div>
+  </div>
+</section>
+
+<section class="section" id="sec-members">
+  <div class="wrap">
+    <h1 class="page-title">إدارة الأعضاء</h1>
+    <p class="page-sub">تجميد · إغلاق · تعديل · إنذار</p>
+    <div class="search-bar"><input id="mSearch" placeholder="ابحث بالاسم أو الرقم..." oninput="renderMembers()"></div>
+    <div id="membersList"></div>
+  </div>
+</section>
+
+<section class="section" id="sec-points">
+  <div class="wrap">
+    <h1 class="page-title">إضافة / خصم نقاط</h1>
+    <p class="page-sub">يتحدّث الرصيد فورًا في حساب العضو</p>
+    <div class="panel">
+      <form id="pointsForm">
+        <div class="form-group"><label class="form-label">العضو</label><select class="form-select" id="pMember" required></select></div>
+        <div class="form-group"><label class="form-label">العملية</label>
+          <select class="form-select" id="pType"><option value="add">إضافة</option><option value="deduct">خصم</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">المبلغ</label><input class="form-input" type="number" id="pAmount" min="1" required></div>
+        <div class="form-group"><label class="form-label">السبب</label><input class="form-input" id="pReason" required></div>
+        <button class="btn btn-primary" type="submit">تنفيذ</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="sec-warnings">
+  <div class="wrap">
+    <h1 class="page-title">الإنذارات</h1>
+    <p class="page-sub">تسجيل إنذار + تطبيق القواعد التلقائية</p>
+    <div class="panel">
+      <form id="warnForm">
+        <div class="form-group"><label class="form-label">العضو</label><select class="form-select" id="wMember" required></select></div>
+        <div class="form-group"><label class="form-label">السبب</label><textarea class="form-textarea" id="wReason" required></textarea></div>
+        <button class="btn btn-warn" type="submit">تسجيل إنذار</button>
+      </form>
+    </div>
+    <div class="panel"><div class="panel-title">سجل الإنذارات</div><div id="warnList"></div></div>
+  </div>
+</section>
+
+<section class="section" id="sec-rules">
+  <div class="wrap">
+    <h1 class="page-title">قواعد النظام</h1>
+    <p class="page-sub">تتحكّم في أرقام الإنذارات</p>
+    <div class="rules-box" id="rulesPreview"></div>
+    <div class="panel">
+      <div class="form-group"><label class="form-label">عند كام إنذار يحصل خصم؟</label><input class="form-input" type="number" id="rDeductAt" min="1"></div>
+      <div class="form-group"><label class="form-label">مبلغ الخصم</label><input class="form-input" type="number" id="rDeductAmt" min="0"></div>
+      <div class="form-group"><label class="form-label">عند كام إنذار يحصل تجميد؟</label><input class="form-input" type="number" id="rFreezeAt" min="1"></div>
+      <div class="form-group"><label class="form-label">أيام التجميد</label><input class="form-input" type="number" id="rFreezeDays" min="1"></div>
+      <div class="form-group"><label class="form-label">عند كام إنذار يتقفل الحساب؟</label><input class="form-input" type="number" id="rCloseAt" min="1"></div>
+      <button class="btn btn-primary" type="button" id="saveRulesBtn">حفظ القواعد</button>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="sec-orders">
+  <div class="wrap">
+    <h1 class="page-title">الطلبات</h1>
+    <p class="page-sub">موافقة / رفض · إنشاء تذكرة</p>
+    <div id="ordersList"></div>
+  </div>
+</section>
+
+<section class="section" id="sec-logs">
+  <div class="wrap">
+    <h1 class="page-title">سجل الأدمن</h1>
+    <p class="page-sub">آخر الإجراءات</p>
+    <div class="panel" id="logsList"></div>
+  </div>
+</section>
+
+<!-- Modals -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">تعديل عضو</div><button class="modal-close" data-close="edit">✕</button></div>
+    <div class="form-group"><label class="form-label">النقابة</label><input class="form-input" id="editGuild"></div>
+    <div class="form-group"><label class="form-label">الرتبة</label><input class="form-input" id="editRank"></div>
+    <button class="btn btn-primary" id="saveEditBtn">حفظ</button>
+    <button class="btn btn-ghost" data-close="edit">إلغاء</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-freeze">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">تجميد حساب</div><button class="modal-close" data-close="freeze">✕</button></div>
+    <p style="font-size:13px;margin-bottom:12px" id="freezeLabel"></p>
+    <div class="form-group"><label class="form-label">المدة (أيام)</label><input class="form-input" type="number" id="freezeDays" value="3" min="1"></div>
+    <button class="btn btn-warn" id="confirmFreezeBtn">تأكيد التجميد</button>
+    <button class="btn btn-ghost" data-close="freeze">إلغاء</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ticket">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">تذكرة معتمدة</div><button class="modal-close" data-close="ticket">✕</button></div>
+    <div id="ticketBox"></div>
+    <button class="btn btn-primary" onclick="window.print()">طباعة / حفظ</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toastMsg"></span></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+import {
+  getFirestore, collection, getDocs, doc, getDoc, updateDoc, addDoc,
+  query, orderBy, limit, serverTimestamp, increment, setDoc
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA_h9yvBeuxRsySYDYZ1MubzHrqKZfsnOs",
+  authDomain: "shiro-bank.firebaseapp.com",
+  projectId: "shiro-bank",
+  storageBucket: "shiro-bank.firebasestorage.app",
+  messagingSenderId: "1082352937803",
+  appId: "1:1082352937803:web:7e5ceee4e7deef63ead6ce",
+  measurementId: "G-9XS3VLN6NR"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let members = [];
+let orders = [];
+let warnings = [];
+let logs = [];
+let rules = { deductAt: 3, deductAmt: 100, freezeAt: 5, freezeDays: 3, closeAt: 7 };
+let selUid = null;
+
+function toast(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function stLabel(s) {
+  return { active:'نشط', frozen:'مجمّد', closed:'مغلق', pending:'معلق', approved:'مقبول', done:'مكتمل', rejected:'مرفوض' }[s] || s;
+}
+function openM(id) { document.getElementById('modal-' + id).classList.add('open'); }
+function closeM(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => closeM(btn.dataset.close));
+});
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+function switchSec(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.sec === id));
+  document.getElementById('sec-' + id).classList.add('active');
+}
+document.querySelectorAll('.nav-tab').forEach(t => t.addEventListener('click', () => switchSec(t.dataset.sec)));
+
+/* Auth */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    location.href = 'login.html';
+    return;
+  }
+  try {
+    const snap = await getDoc(doc(db, 'members', user.uid));
+    if (!snap.exists() || snap.data().role !== 'admin') {
+      alert('ليس لديك صلاحية الأدمن.\nأضف role = admin في مستندك داخل Firestore.');
+      location.href = 'dashboard.html';
+      return;
+    }
+    await loadAll();
+    document.getElementById('loading').classList.add('hide');
+  } catch (e) {
+    console.error(e);
+    toast('خطأ في التحميل');
+    document.getElementById('loading').classList.add('hide');
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await signOut(auth);
+  location.href = 'login.html';
+});
+
+async function loadAll() {
+  await Promise.all([loadMembers(), loadOrders(), loadWarnings(), loadRules(), loadLogs()]);
+  renderMembers();
+  renderOrders();
+  renderWarns();
+  renderRules();
+  renderLogs();
+  updateStats();
+}
+
+async function loadMembers() {
+  const snap = await getDocs(collection(db, 'members'));
+  members = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+}
+
+async function loadOrders() {
+  try {
+    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(50));
+    const snap = await getDocs(q);
+    orders = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+  } catch {
+    const snap = await getDocs(collection(db, 'orders'));
+    orders = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+  }
+}
+
+async function loadWarnings() {
+  try {
+    const q = query(collection(db, 'warnings'), orderBy('createdAt', 'desc'), limit(40));
+    const snap = await getDocs(q);
+    warnings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch {
+    warnings = [];
+  }
+}
+
+async function loadRules() {
+  const snap = await getDoc(doc(db, 'config', 'rules'));
+  if (snap.exists()) rules = { ...rules, ...snap.data() };
+}
+
+async function loadLogs() {
+  try {
+    const q = query(collection(db, 'adminLogs'), orderBy('createdAt', 'desc'), limit(30));
+    const snap = await getDocs(q);
+    logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch {
+    logs = [];
+  }
+}
+
+async function addLog(action) {
+  logs.unshift({ action, createdAt: new Date() });
+  renderLogs();
+  try {
+    await addDoc(collection(db, 'adminLogs'), { action, createdAt: serverTimestamp() });
+  } catch {}
+}
+
+function updateStats() {
+  document.getElementById('sTotal').textContent = members.length;
+  document.getElementById('sActive').textContent = members.filter(m => (m.status || 'active') === 'active').length;
+  document.getElementById('sPending').textContent = orders.filter(o => o.status === 'pending').length;
+  document.getElementById('sWarn').textContent = warnings.length;
+  document.getElementById('ordersDot').style.display = orders.some(o => o.status === 'pending') ? 'inline-block' : 'none';
+}
+
+/* Members UI */
+window.renderMembers = function() {
+  const q = (document.getElementById('mSearch')?.value || '').toLowerCase();
+  let list = members;
+  if (q) {
+    list = members.filter(m =>
+      (m.nickname || '').toLowerCase().includes(q) ||
+      (m.memberId || '').toLowerCase().includes(q) ||
+      (m.email || '').toLowerCase().includes(q)
+    );
+  }
+  document.getElementById('membersList').innerHTML = list.map(m => {
+    const st = m.status || 'active';
+    return `
+    <div class="member-row ${st}">
+      <div class="m-left">
+        <div class="m-avatar">${(m.nickname || '?')[0]}</div>
+        <div>
+          <div class="m-name">${m.nickname || '—'} <span class="st ${st}">${stLabel(st)}</span></div>
+          <div class="m-meta">${m.memberId || m.uid.slice(0,8)} · ${m.guild || '—'} · ${m.rank || 'عضو'}${m.warnings ? ` · <span style="color:var(--warning)">${m.warnings} إنذار</span>` : ''}</div>
+          <div class="m-balance">${Number(m.balance || 0).toLocaleString()} نقطة</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-x" onclick="openEdit('${m.uid}')">تعديل</button>
+        ${st !== 'active' ? `<button class="btn-x ok" onclick="reactivate('${m.uid}')">تشغيل</button>` : ''}
+        <button class="btn-x warn" onclick="openFreeze('${m.uid}')">تجميد</button>
+        <button class="btn-x" onclick="quickWarn('${m.uid}')">إنذار</button>
+        <button class="btn-x danger" onclick="closeAccount('${m.uid}')">إغلاق</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="panel" style="text-align:center;color:var(--muted)">لا يوجد أعضاء</div>';
+
+  const opts = members.map(m => `<option value="${m.uid}">${m.nickname || m.email} (${m.memberId || ''})</option>`).join('');
+  document.getElementById('pMember').innerHTML = opts;
+  document.getElementById('wMember').innerHTML = opts;
+  updateStats();
+};
+
+window.openEdit = function(uid) {
+  selUid = uid;
+  const m = members.find(x => x.uid === uid);
+  document.getElementById('editGuild').value = m.guild || '';
+  document.getElementById('editRank').value = m.rank || '';
+  openM('edit');
+};
+
+document.getElementById('saveEditBtn').addEventListener('click', async () => {
+  if (!selUid) return;
+  const guild = document.getElementById('editGuild').value.trim();
+  const rank = document.getElementById('editRank').value.trim();
+  await updateDoc(doc(db, 'members', selUid), { guild, rank, updatedAt: serverTimestamp() });
+  const m = members.find(x => x.uid === selUid);
+  if (m) { m.guild = guild; m.rank = rank; }
+  await addLog(`تعديل ${m?.nickname}: نقابة=${guild} رتبة=${rank}`);
+  closeM('edit');
+  renderMembers();
+  toast('تم التعديل');
+});
+
+window.openFreeze = function(uid) {
+  selUid = uid;
+  const m = members.find(x => x.uid === uid);
+  document.getElementById('freezeLabel').textContent = 'تجميد حساب: ' + (m?.nickname || '');
+  openM('freeze');
+};
+
+document.getElementById('confirmFreezeBtn').addEventListener('click', async () => {
+  if (!selUid) return;
+  const days = +document.getElementById('freezeDays').value || 3;
+  await updateDoc(doc(db, 'members', selUid), { status: 'frozen', updatedAt: serverTimestamp() });
+  const m = members.find(x => x.uid === selUid);
+  if (m) m.status = 'frozen';
+  await addLog(`تجميد ${m?.nickname} لمدة ${days} يوم`);
+  closeM('freeze');
+  renderMembers();
+  toast('تم التجميد');
+});
+
+window.reactivate = async function(uid) {
+  await updateDoc(doc(db, 'members', uid), { status: 'active', updatedAt: serverTimestamp() });
+  const m = members.find(x => x.uid === uid);
+  if (m) m.status = 'active';
+  await addLog(`تشغيل ${m?.nickname}`);
+  renderMembers();
+  toast('تم التشغيل');
+};
+
+window.closeAccount = async function(uid) {
+  if (!confirm('إغلاق الحساب؟')) return;
+  await updateDoc(doc(db, 'members', uid), { status: 'closed', updatedAt: serverTimestamp() });
+  const m = members.find(x => x.uid === uid);
+  if (m) m.status = 'closed';
+  await addLog(`إغلاق حساب ${m?.nickname}`);
+  renderMembers();
+  toast('تم الإغلاق');
+};
+
+/* Points */
+document.getElementById('pointsForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const uid = document.getElementById('pMember').value;
+  const type = document.getElementById('pType').value;
+  const amt = +document.getElementById('pAmount').value;
+  const reason = document.getElementById('pReason').value;
+  const m = members.find(x => x.uid === uid);
+  if (!m) return;
+
+  const delta = type === 'add' ? amt : -amt;
+  await updateDoc(doc(db, 'members', uid), {
+    balance: increment(delta),
+    updatedAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'transactions'), {
+    uid,
+    name: (type === 'add' ? 'إضافة إدارية: ' : 'خصم إداري: ') + reason,
+    amount: delta,
+    createdAt: serverTimestamp()
+  });
+  m.balance = Math.max(0, (m.balance || 0) + delta);
+  await addLog(`${type === 'add' ? 'إضافة' : 'خصم'} ${amt} لـ ${m.nickname} — ${reason}`);
+  e.target.reset();
+  renderMembers();
+  toast('تم تنفيذ العملية');
+});
+
+/* Warnings */
+document.getElementById('warnForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  await applyWarn(document.getElementById('wMember').value, document.getElementById('wReason').value);
+  e.target.reset();
+});
+
+window.quickWarn = async function(uid) {
+  const r = prompt('سبب الإنذار:');
+  if (r) await applyWarn(uid, r);
+};
+
+async function applyWarn(uid, reason) {
+  const m = members.find(x => x.uid === uid);
+  if (!m) return;
+  const newCount = (m.warnings || 0) + 1;
+  const updates = { warnings: newCount, updatedAt: serverTimestamp() };
+
+  await addDoc(collection(db, 'warnings'), {
+    uid,
+    memberName: m.nickname,
+    memberId: m.memberId,
+    reason,
+    createdAt: serverTimestamp()
+  });
+
+  if (newCount === rules.deductAt && rules.deductAmt > 0) {
+    updates.balance = increment(-rules.deductAmt);
+    m.balance = Math.max(0, (m.balance || 0) - rules.deductAmt);
+    await addDoc(collection(db, 'transactions'), {
+      uid, name: 'خصم تلقائي بسبب الإنذارات', amount: -rules.deductAmt, createdAt: serverTimestamp()
+    });
+    toast(`${m.nickname}: خصم تلقائي ${rules.deductAmt}`);
+  }
+  if (newCount === rules.freezeAt && (m.status || 'active') === 'active') {
+    updates.status = 'frozen';
+    m.status = 'frozen';
+    toast(`${m.nickname}: تم التجميد تلقائيًا`);
+  }
+  if (newCount >= rules.closeAt) {
+    updates.status = 'closed';
+    m.status = 'closed';
+    toast(`${m.nickname}: تم إغلاق الحساب تلقائيًا`);
+  }
+
+  await updateDoc(doc(db, 'members', uid), updates);
+  m.warnings = newCount;
+  warnings.unshift({ memberName: m.nickname, reason, memberId: m.memberId, createdAt: new Date() });
+  await addLog(`إنذار (${newCount}) لـ ${m.nickname}: ${reason}`);
+  renderMembers();
+  renderWarns();
+  updateStats();
+}
+
+function renderWarns() {
+  document.getElementById('warnList').innerHTML = warnings.length ? warnings.map(w => `
+    <div class="warn-item">
+      <div class="log-action">${w.memberName || '—'} — ${w.reason}</div>
+      <div class="log-meta">${w.memberId || ''} · ${w.createdAt?.toDate ? w.createdAt.toDate().toLocaleString('ar-EG') : 'الآن'}</div>
+    </div>
+  `).join('') : '<div style="color:var(--muted)">لا توجد إنذارات</div>';
+}
+
+/* Rules */
+function renderRules() {
+  document.getElementById('rDeductAt').value = rules.deductAt;
+  document.getElementById('rDeductAmt').value = rules.deductAmt;
+  document.getElementById('rFreezeAt').value = rules.freezeAt;
+  document.getElementById('rFreezeDays').value = rules.freezeDays;
+  document.getElementById('rCloseAt').value = rules.closeAt;
+  document.getElementById('rulesPreview').innerHTML = `
+    <b>${rules.deductAt} إنذارات:</b> خصم ${rules.deductAmt} نقطة<br>
+    <b>${rules.freezeAt} إنذارات:</b> تجميد ${rules.freezeDays} أيام<br>
+    <b>${rules.closeAt}+ إنذارات:</b> إغلاق الحساب
+  `;
+}
+
+document.getElementById('saveRulesBtn').addEventListener('click', async () => {
+  rules = {
+    deductAt: +document.getElementById('rDeductAt').value || 3,
+    deductAmt: +document.getElementById('rDeductAmt').value || 0,
+    freezeAt: +document.getElementById('rFreezeAt').value || 5,
+    freezeDays: +document.getElementById('rFreezeDays').value || 3,
+    closeAt: +document.getElementById('rCloseAt').value || 7
+  };
+  await setDoc(doc(db, 'config', 'rules'), rules, { merge: true });
+  renderRules();
+  await addLog('تحديث قواعد الإنذارات');
+  toast('تم حفظ القواعد');
+});
+
+/* Orders */
+function renderOrders() {
+  document.getElementById('ordersList').innerHTML = orders.length ? orders.map(o => `
+    <div class="order-row">
+      <div class="m-left">
+        <div>
+          <div class="m-name">${o.title || o.productName || 'طلب'} <span class="st ${o.status}">${stLabel(o.status)}</span></div>
+          <div class="m-meta">${o.nickname || ''} · ${o.orderId || o.docId}</div>
+          <div class="m-meta">${o.note || ''} · ${o.amount ? o.amount + ' نقطة' : ''}</div>
+        </div>
+      </div>
+      <div class="actions">
+        ${o.status === 'pending' ? `
+          <button class="btn-x ok" onclick="approveOrder('${o.docId}')">موافقة</button>
+          <button class="btn-x danger" onclick="rejectOrder('${o.docId}')">رفض</button>
+        ` : ''}
+        ${o.status === 'approved' || o.status === 'done' ? `<button class="btn-x" onclick="showTicket('${o.docId}')">التذكرة</button>` : ''}
+      </div>
+    </div>
+  `).join('') : '<div class="panel" style="text-align:center;color:var(--muted)">لا توجد طلبات</div>';
+  updateStats();
+}
+
+window.approveOrder = async function(docId) {
+  const o = orders.find(x => x.docId === docId);
+  if (!o) return;
+  await updateDoc(doc(db, 'orders', docId), {
+    status: 'approved',
+    approvedAt: serverTimestamp()
+  });
+  o.status = 'approved';
+  await addLog(`موافقة على ${o.orderId || docId} — ${o.nickname}`);
+  renderOrders();
+  showTicket(docId);
+  toast('تمت الموافقة');
+};
+
+window.rejectOrder = async function(docId) {
+  const o = orders.find(x => x.docId === docId);
+  if (!o) return;
+  await updateDoc(doc(db, 'orders', docId), { status: 'rejected' });
+  o.status = 'rejected';
+  await addLog(`رفض ${o.orderId || docId}`);
+  renderOrders();
+  toast('تم الرفض');
+};
+
+window.showTicket = function(docId) {
+  const o = orders.find(x => x.docId === docId);
+  if (!o) return;
+  document.getElementById('ticketBox').innerHTML = `
+    <div class="ticket">
+      <div class="ticket-head">
+        <div class="ticket-logo">SHIRO BANK · TICKET</div>
+        <div class="ticket-id">${o.orderId || docId}</div>
+      </div>
+      <div class="ticket-row"><span>العضو</span><b>${o.nickname || '—'}</b></div>
+      <div class="ticket-row"><span>المنتج</span><b>${o.title || '—'}</b></div>
+      <div class="ticket-row"><span>الملاحظة</span><b>${o.note || '—'}</b></div>
+      <div class="ticket-row"><span>الحالة</span><b style="color:var(--success)">معتمد</b></div>
+      <div class="ticket-stamp">✓ تصريح معتمد من بنك المملكة</div>
+    </div>
+  `;
+  openM('ticket');
+};
+
+function renderLogs() {
+  const html = logs.length ? logs.map(l => `
+    <div class="log-item">
+      <div class="log-action">${l.action}</div>
+      <div class="log-meta">${l.createdAt?.toDate ? l.createdAt.toDate().toLocaleString('ar-EG') : 'الآن'}</div>
+    </div>
+  `).join('') : '<div style="color:var(--muted)">فارغ</div>';
+  document.getElementById('logsList').innerHTML = html;
+  document.getElementById('homeLogs').innerHTML = logs.slice(0, 5).map(l => `
+    <div class="log-item"><div class="log-action">${l.action}</div></div>
+  `).join('') || '<div style="color:var(--muted)">لا توجد عمليات بعد</div>';
+}
+</script>
+</body>
+</html>
