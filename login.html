@@ -445,7 +445,6 @@ header {
 }
 @keyframes pulse { 0%,100%{opacity:.6} 50%{opacity:1} }
 
-/* Success + Complete Profile overlays */
 .success-overlay, .complete-overlay {
   position: absolute; inset: 0;
   background: rgba(4,7,12,.97);
@@ -468,9 +467,7 @@ header {
 .success-text { font-size: 1.15rem; font-weight: 700; }
 .success-sub { font-size: .84rem; color: var(--muted); text-align: center; padding: 0 1rem; }
 
-.complete-overlay .complete-box {
-  width: 100%; max-width: 320px;
-}
+.complete-overlay .complete-box { width: 100%; max-width: 320px; }
 .complete-overlay .login-title { font-size: 1.35rem; margin-bottom: .5rem; text-align: center; }
 .complete-overlay .login-sub { text-align: center; margin-bottom: 1.2rem; font-size: .82rem; }
 
@@ -536,14 +533,14 @@ header {
   <div class="orb orb-3"></div>
 
   <header>
-    <a href="#" class="logo hover-target" onclick="history.back(); return false;">
+    <a href="index.html" class="logo hover-target">
       <div class="crest">城</div>
       <div class="logo-name">
         <span>SHIRO</span>
         <span>BANK</span>
       </div>
     </a>
-    <a href="#" class="back-home hover-target" onclick="history.back(); return false;">
+    <a href="index.html" class="back-home hover-target">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M19 12H5M12 19l-7-7 7-7"/>
       </svg>
@@ -828,9 +825,8 @@ function showSuccess(title) {
   document.getElementById('successTitle').textContent = title;
   document.getElementById('successOverlay').classList.add('show');
   setTimeout(() => {
-    document.getElementById('successOverlay').classList.remove('show');
-    // location.href = 'dashboard.html';
-  }, 2200);
+    location.href = 'dashboard.html';
+  }, 1800);
 }
 
 /* Login */
@@ -913,7 +909,6 @@ document.getElementById('registerForm').addEventListener('submit', e => {
 
 /* Social → complete profile first */
 function startSocial(provider) {
-  // Simulate OAuth success then ask for nick + guild
   document.getElementById('completeOverlay').classList.add('show');
   document.getElementById('compNick').value = '';
   document.getElementById('compGuild').value = '';
