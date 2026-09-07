@@ -684,45 +684,70 @@ async function saveBalance(newBalance, txName, amount) {
   renderFullTx();
 }
 
-// البحث يكون بواسطة memberId أو email فقط، ولا نعرض أي بيانات حساسة.
-async function findMember(identifier) {
-  const rawValue = identifier.trim();
-  const values = { memberId: rawValue, email: rawValue.toLowerCase() };
-  if (!rawValue) return null;
-  for (const field of ['memberId', 'email']) {
-    const q = query(collection(db, 'members'), where(field, '==', values[field]), limit(1));
-    const snap = await getDocs(q);
-    if (!snap.empty) {
-      const d = snap.docs[0];
-      return { uid: d.id, ...d.data() };
-    }
-  }
-  return null;
+// بحث جزئي: مثل SHR-6437 أو 64، ويعرض الحسابات النشطة فقط.
+async function findMembers(identifier) {
+  const value = identifier.trim().toLowerCase();
+  if (!value) return [];
+  const snap = await getDocs(collection(db, 'members'));
+  return snap.docs
+    .map(d => ({ uid: d.id, ...d.data() }))
+    .filter(member => isActiveMember(member) && member.uid !== currentUser.uid)
+    .filter(member => {
+      const memberId = String(member.memberId || '').toLowerCase();
+      const email = String(member.email || '').toLowerCase();
+      const nickname = String(member.nickname || '').toLowerCase();
+      return memberId.includes(value) || email.includes(value) || nickname.includes(value);
+    })
+    .slice(0, 20);
+}
+
+function isActiveMember(member) {
+  return member && member.status === 'active';
+}
+
+async function getActiveMember(uid) {
+  const snap = await getDoc(doc(db, 'members', uid));
+  if (!snap.exists()) return null;
+  const member = { uid: snap.id, ...snap.data() };
+  return isActiveMember(member) ? member : null;
 }
 
 let selectedTransferMember = null;
 let selectedRequestMember = null;
+let searchResults = { transfer: [], request: [] };
+
+window.chooseMember = function(type, uid) {
+  const member = searchResults[type].find(item => item.uid === uid);
+  if (!member) return;
+  if (type === 'transfer') selectedTransferMember = member;
+  else selectedRequestMember = member;
+  const box = document.getElementById(type === 'transfer' ? 'transferMemberPreview' : 'requestMemberPreview');
+  box.style.color = 'var(--text)';
+  box.innerHTML = `<b>تم اختيار:</b> ${escapeHtml(member.nickname || 'عضو')}<br><span style="color:var(--muted)">${escapeHtml(member.memberId || '')}${member.guild ? ' · ' + escapeHtml(member.guild) : ''}${member.rank ? ' · ' + escapeHtml(member.rank) : ''}</span>`;
+};
 
 window.previewMember = async function(type) {
   const inputId = type === 'transfer' ? 'transferTo' : 'requestFrom';
   const boxId = type === 'transfer' ? 'transferMemberPreview' : 'requestMemberPreview';
   const box = document.getElementById(boxId);
   const value = document.getElementById(inputId).value;
+  if (type === 'transfer') selectedTransferMember = null;
+  else selectedRequestMember = null;
+  searchResults[type] = [];
   box.style.display = 'block';
   box.textContent = 'جاري البحث عن العضو...';
   try {
-    const member = await findMember(value);
-    if (!member || member.uid === currentUser.uid) {
+    const members = await findMembers(value);
+    searchResults[type] = members;
+    if (!members.length) {
       if (type === 'transfer') selectedTransferMember = null;
       else selectedRequestMember = null;
       box.style.color = 'var(--danger)';
-      box.textContent = member?.uid === currentUser.uid ? 'لا يمكن اختيار حسابك أنت.' : 'لم يتم العثور على عضو بهذا الرقم أو البريد.';
+      box.textContent = 'لا توجد حسابات نشطة مطابقة. الحسابات المتوقفة أو المجمدة لا تظهر.';
       return;
     }
-    if (type === 'transfer') selectedTransferMember = member;
-    else selectedRequestMember = member;
     box.style.color = 'var(--text)';
-    box.innerHTML = `<b>سيتم التعامل مع:</b> ${escapeHtml(member.nickname || 'عضو')}<br><span style="color:var(--muted)">${escapeHtml(member.memberId || '')}${member.guild ? ' · ' + escapeHtml(member.guild) : ''}${member.rank ? ' · ' + escapeHtml(member.rank) : ''}</span>`;
+    box.innerHTML = `<b>اختر الحساب الصحيح:</b><div style="display:grid;gap:6px;margin-top:8px">${members.map(member => `<button type="button" class="btn-sm" style="text-align:right" onclick="chooseMember('${type}','${escapeHtml(member.uid)}')"><b>${escapeHtml(member.nickname || 'عضو')}</b><br><small>${escapeHtml(member.memberId || '')}${member.guild ? ' · ' + escapeHtml(member.guild) : ''}</small></button>`).join('')}</div>`;
   } catch (e) {
     console.error('فشل البحث عن العضو:', e.code, e.message);
     box.style.color = 'var(--danger)';
@@ -824,6 +849,11 @@ window.handleTransfer = async function(e) {
   if (!Number.isInteger(amount) || amount < 1) return;
   if (amount > balance) { showToast('الرصيد غير كافٍ'); return; }
   try {
+    selectedTransferMember = await getActiveMember(selectedTransferMember.uid);
+    if (!selectedTransferMember) {
+      showToast('الحساب غير نشط أو تم إيقافه');
+      return;
+    }
     const senderRef = doc(db, 'members', currentUser.uid);
     const receiverRef = doc(db, 'members', selectedTransferMember.uid);
     const senderTx = doc(collection(db, 'transactions'));
@@ -857,6 +887,11 @@ window.handleRequestPoints = async function(e) {
   if (!Number.isInteger(amount) || amount < 1 || !reason) return;
   const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
   try {
+    selectedRequestMember = await getActiveMember(selectedRequestMember.uid);
+    if (!selectedRequestMember) {
+      showToast('الحساب غير نشط أو تم إيقافه');
+      return;
+    }
     await addDoc(collection(db, 'orders'), {
       uid: currentUser.uid,
       fromUid: selectedRequestMember.uid,
