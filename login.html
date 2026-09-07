@@ -2,1056 +2,1037 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Shiro Bank — دخول البنك</title>
-<meta name="theme-color" content="#00d4ff">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='none' stroke='%23d4af37' stroke-width='3'/%3E%3Ctext x='50' y='62' text-anchor='middle' font-size='42' fill='%2300d4ff'%3E城%3C/text%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shiro Kingdom Central Bank — البنك المركزي للمملكة</title>
+<meta name="description" content="البنك المركزي الداخلي لمملكة Shiro؛ لتنظيم حسابات الأعضاء والنقابات والاستحقاقات والمزايا الرسمية داخل المملكة.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #04070c;
   --surface: #0a0f18;
+  --line: rgba(255,255,255,0.07);
+  --text: #f0f5fa;
+  --muted: #7a8a9e;
   --cyan: #00d4ff;
   --cyan-dim: rgba(0,212,255,0.15);
   --gold: #d4af37;
   --gold-dim: rgba(212,175,55,0.15);
-  --text: #f0f5fa;
-  --muted: #7a8a9e;
-  --border: rgba(0,212,255,0.22);
-  --border2: rgba(255,255,255,0.07);
+  --danger: #ff4757;
   --success: #2ed573;
-  --error: #ff4757;
-  --ease: cubic-bezier(0.16,1,0.3,1);
-  --ease-out: cubic-bezier(0.22,1,0.36,1);
+  --radius: 20px;
+  --t: 0.45s cubic-bezier(0.22,1,0.36,1);
 }
+[data-theme="cyan"]   { --cyan:#00d4ff; --cyan-dim:rgba(0,212,255,0.15); }
+[data-theme="purple"] { --cyan:#a855f7; --cyan-dim:rgba(168,85,247,0.15); }
+[data-theme="gold"]   { --cyan:#d4af37; --cyan-dim:rgba(212,175,55,0.15); }
+[data-theme="pink"]   { --cyan:#ec4899; --cyan-dim:rgba(236,72,153,0.15); }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { height: 100%; }
+html { scroll-behavior: smooth; }
 body {
-  background: var(--bg);
-  color: var(--text);
+  background: var(--bg); color: var(--text);
   font-family: Cairo, 'Segoe UI', sans-serif;
-  min-height: 100%;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; min-height: 100vh; line-height: 1.6;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  html { scroll-behavior: auto; }
 }
 a { text-decoration: none; color: inherit; }
-button, input, select { font-family: inherit; border: none; background: none; color: inherit; }
-::selection { background: rgba(0,212,255,0.35); color: #fff; }
+button, input { font: inherit; border: none; outline: none; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
 
-@media (hover: hover) and (pointer: fine) {
-  body { cursor: none; }
-  button, input, a, select { cursor: none; }
-  #cursor-dot {
-    width: 6px; height: 6px; background: var(--cyan);
-    border-radius: 50%; position: fixed; top: 0; left: 0;
-    pointer-events: none; z-index: 9999;
-    transform: translate(-50%,-50%); mix-blend-mode: screen;
-  }
-  #cursor-ring {
-    width: 36px; height: 36px;
-    border: 1.5px solid rgba(0,212,255,0.5);
-    border-radius: 50%; position: fixed; top: 0; left: 0;
-    pointer-events: none; z-index: 9998;
-    transform: translate(-50%,-50%);
-    transition: width .3s var(--ease), height .3s var(--ease), border-color .3s, background .3s;
-  }
-  body.cursor-hover #cursor-ring {
-    width: 58px; height: 58px;
-    border-color: var(--gold);
-    background: rgba(212,175,55,0.08);
-  }
-  body.cursor-hover #cursor-dot { transform: translate(-50%,-50%) scale(0); }
-}
-@media (hover: none), (pointer: coarse) {
-  #cursor-dot, #cursor-ring { display: none !important; }
-}
+.wrap { width: min(1200px, calc(100% - 48px)); margin: auto; position: relative; z-index: 2; }
 
-#bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.5; }
-#noise {
-  position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.03;
+body::before {
+  content: ''; position: fixed; inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-.grid-overlay {
-  position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  background-image:
-    linear-gradient(rgba(0,212,255,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,212,255,0.035) 1px, transparent 1px);
-  background-size: 52px 52px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 10%, transparent 70%);
-}
-.vignette {
-  position: fixed; inset: 0; z-index: 2; pointer-events: none;
-  background: radial-gradient(ellipse 75% 65% at 50% 45%, transparent 30%, rgba(0,0,0,0.55) 100%);
+  opacity: .02; pointer-events: none; z-index: 9998;
 }
 
-.orb { position: absolute; border-radius: 50%; pointer-events: none; z-index: 2; filter: blur(90px); }
-.orb-1 { width: 480px; height: 480px; background: var(--cyan-dim); top: -160px; right: -100px; animation: float1 22s ease-in-out infinite; }
-.orb-2 { width: 320px; height: 320px; background: var(--gold-dim); bottom: -80px; left: -80px; animation: float2 26s ease-in-out infinite; }
-.orb-3 { width: 180px; height: 180px; background: rgba(0,212,255,0.08); top: 40%; left: 50%; transform: translateX(-50%); animation: float3 16s ease-in-out infinite; }
-
-@keyframes float1 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(-35px,45px)} 66%{transform:translate(25px,-25px)} }
-@keyframes float2 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(40px,-30px)} 66%{transform:translate(-25px,40px)} }
-@keyframes float3 { 0%,100%{transform:translateX(-50%) scale(1);opacity:.5} 50%{transform:translateX(-50%) scale(1.15);opacity:.85} }
-
-@media (prefers-reduced-motion: reduce) {
-  .orb, .loader-logo, .status-dot { animation: none !important; }
-  .login-card { animation: none !important; opacity: 1; transform: none; filter: none; }
-  * { transition-duration: 0.01ms !important; }
+#preloader {
+  position: fixed; inset: 0; background: var(--bg); z-index: 99999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+  transition: opacity .9s, visibility .9s;
 }
-
-#loader {
-  position: fixed; inset: 0; z-index: 10000;
-  background: var(--bg);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 1.6rem; transition: opacity .8s var(--ease), visibility .8s;
+#preloader.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-ring {
+  width: 72px; height: 72px; border-radius: 50%; border: 2px solid transparent;
+  border-top-color: var(--cyan); border-right-color: var(--gold);
+  animation: spin 1.2s linear infinite; display: grid; place-items: center; position: relative;
 }
-#loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
-.loader-logo {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.1rem; font-weight: 700; letter-spacing: .35em;
-  color: var(--cyan); text-shadow: 0 0 28px var(--cyan-dim);
-  animation: logoPulse 2s ease-in-out infinite;
-}
-@keyframes logoPulse { 0%,100%{opacity:.75} 50%{opacity:1} }
-.loader-bar-wrap { width: 160px; height: 2px; background: rgba(0,212,255,0.15); border-radius: 2px; overflow: hidden; }
-.loader-bar {
-  height: 100%; width: 0;
+.loader-ring::before { content: '城'; font-size: 24px; color: var(--cyan); animation: spin 1.2s linear infinite reverse; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text { font: 600 12px 'Space Grotesk', monospace; letter-spacing: .35em; color: var(--muted); direction: ltr; }
+.loader-bar { width: 160px; height: 2px; background: var(--line); border-radius: 2px; overflow: hidden; position: relative; }
+.loader-bar::after {
+  content: ''; position: absolute; inset: 0;
   background: linear-gradient(90deg, var(--cyan), var(--gold));
-  transition: width 1.2s var(--ease);
+  transform: translateX(-100%); animation: loadSlide 2s forwards;
 }
-.loader-pct {
-  font-family: 'Space Mono', monospace;
-  font-size: .6rem; letter-spacing: .2em; color: var(--muted);
+@keyframes loadSlide { to { transform: translateX(0); } }
+
+.cursor, .cursor-dot { position: fixed; pointer-events: none; z-index: 99999; transform: translate(-50%, -50%); display: none; }
+@media (pointer: fine) {
+  body { cursor: none; }
+  .cursor, .cursor-dot { display: block; }
+}
+.cursor {
+  width: 20px; height: 20px; border: 1.5px solid var(--cyan); border-radius: 50%;
+  transition: width .3s, height .3s, border-color .3s, background .3s; mix-blend-mode: difference;
+}
+.cursor.hover { width: 48px; height: 48px; border-color: var(--gold); background: rgba(212,175,55,.08); }
+.cursor-dot { width: 4px; height: 4px; background: var(--cyan); border-radius: 50%; }
+
+.bg-orb { position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0; opacity: .28; }
+.orb-1 {
+  width: 600px; height: 600px; background: radial-gradient(circle, var(--cyan-dim), transparent);
+  top: -200px; right: -200px; animation: floatOrb 22s infinite;
+}
+.orb-2 {
+  width: 400px; height: 400px; background: radial-gradient(circle, var(--gold-dim), transparent);
+  bottom: -100px; left: -100px; animation: floatOrb 28s infinite reverse;
+}
+@keyframes floatOrb {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(30px,-30px) scale(1.08); }
+  66% { transform: translate(-20px,20px) scale(.92); }
+}
+#particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--cyan), transparent); border-radius: 10px; }
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--gold));
+  z-index: 100000; width: 0%; transition: width .1s linear;
 }
 
-.wrap {
-  position: relative; z-index: 10; flex: 1;
-  display: flex; flex-direction: column; min-height: 100svh;
+.top {
+  height: 38px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px;
+  position: relative; z-index: 10; background: rgba(4,7,12,.85); backdrop-filter: blur(12px);
 }
+.top .wrap { height: 100%; display: flex; align-items: center; justify-content: space-between; }
+.top .live-clock { font-family: 'Space Grotesk', monospace; color: var(--cyan); letter-spacing: .08em; }
 
 header {
-  position: relative; z-index: 90;
-  padding: 1.15rem 1.25rem;
-  display: flex; align-items: center; justify-content: space-between;
-  max-width: 1100px; margin: 0 auto; width: 100%;
-  opacity: 0; animation: fadeDown .8s var(--ease) .2s forwards;
+  height: 76px; position: fixed; top: 38px; left: 0; right: 0; z-index: 100;
+  background: rgba(4,7,12,.72); border-bottom: 1px solid var(--line); backdrop-filter: blur(24px);
+  transform: translateY(-100%); transition: transform .7s cubic-bezier(0.22,1,0.36,1), background .3s;
 }
-@keyframes fadeDown { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:none} }
-
-.logo {
-  display: flex; align-items: center; gap: 11px;
-  font-weight: 700; transition: opacity .3s;
-}
-.logo:hover { opacity: .85; }
+header.visible { transform: translateY(0); }
+header.scrolled { background: rgba(4,7,12,.95); box-shadow: 0 4px 30px rgba(0,0,0,.4); }
+nav { height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.brand { display: flex; align-items: center; gap: 12px; direction: ltr; }
 .crest {
-  width: 36px; height: 36px;
-  border: 1.5px solid var(--gold);
-  border-radius: 50%;
-  display: grid; place-items: center;
-  color: var(--cyan); font-size: 18px;
-  box-shadow: 0 0 20px var(--cyan-dim);
-  flex-shrink: 0;
+  width: 40px; height: 40px; border: 1.5px solid var(--gold); border-radius: 50%;
+  display: grid; place-items: center; color: var(--cyan); font-size: 20px;
+  box-shadow: 0 0 24px var(--cyan-dim); transition: var(--t); position: relative; overflow: hidden;
 }
-.logo-name {
-  display: flex; flex-direction: column; line-height: 1.1;
-  direction: ltr;
+.crest::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,.18) 50%, transparent 60%);
+  transform: translateX(-100%); transition: transform .6s;
 }
-.logo-name span:first-child {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: .92rem; font-weight: 700; letter-spacing: .14em;
+.brand:hover .crest::after { transform: translateX(100%); }
+.brand:hover .crest { transform: rotate(360deg); }
+.brand strong { font: 700 20px 'Space Grotesk', sans-serif; letter-spacing: .18em; }
+.links { display: flex; gap: 28px; list-style: none; }
+.links a {
+  color: var(--muted); font-size: 13px; font-weight: 500; position: relative; padding: 6px 0; transition: color .3s;
 }
-.logo-name span:last-child {
-  font-family: 'Space Mono', monospace;
-  font-size: .48rem; color: var(--cyan); letter-spacing: .22em;
+.links a::after {
+  content: ''; position: absolute; bottom: 0; right: 0; width: 0; height: 1.5px;
+  background: linear-gradient(90deg, var(--cyan), var(--gold));
+  transition: width .4s cubic-bezier(0.22,1,0.36,1);
+}
+.links a:hover { color: var(--cyan); }
+.links a:hover::after { width: 100%; }
+
+.theme-switcher { display: flex; gap: 8px; direction: ltr; }
+.theme-dot {
+  width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent;
+  transition: var(--t); cursor: pointer;
+}
+.theme-dot:hover { transform: scale(1.25); }
+.theme-dot.active { border-color: #fff; box-shadow: 0 0 12px currentColor; }
+.theme-dot[data-theme-dot="cyan"]   { background: #00d4ff; color: #00d4ff; }
+.theme-dot[data-theme-dot="purple"] { background: #a855f7; color: #a855f7; }
+.theme-dot[data-theme-dot="gold"]   { background: #d4af37; color: #d4af37; }
+.theme-dot[data-theme-dot="pink"]   { background: #ec4899; color: #ec4899; }
+
+.navbtn {
+  border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--text);
+  border-radius: 12px; padding: 10px 20px; font-weight: 600; font-size: 13px;
+  transition: var(--t); position: relative; overflow: hidden; cursor: pointer; display: inline-block;
+}
+.navbtn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--cyan), var(--gold)); opacity: 0; transition: opacity .3s;
+}
+.navbtn:hover::before { opacity: .12; }
+.navbtn:hover {
+  border-color: var(--cyan); color: var(--cyan); transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--cyan-dim);
+}
+.mobile-menu-btn {
+  display: none; width: 40px; height: 40px; background: none; border: 1px solid var(--line);
+  border-radius: 10px; color: var(--text); font-size: 18px; cursor: pointer; place-items: center;
 }
 
-.back-home {
-  font-size: .72rem; font-weight: 600;
-  color: var(--muted); display: flex; align-items: center; gap: 6px;
-  padding: 8px 14px; border-radius: 10px; border: 1px solid transparent;
-  transition: all .25s;
+.hero {
+  min-height: 100vh; display: grid; grid-template-columns: 1.1fr .9fr; gap: 60px;
+  align-items: center; padding: 140px 0 80px;
 }
-.back-home:hover {
-  color: var(--cyan); border-color: var(--border);
-  background: var(--cyan-dim);
+.hero-copy { direction: rtl; }
+.badge {
+  display: inline-flex; gap: 8px; align-items: center; padding: 8px 16px;
+  background: linear-gradient(135deg, var(--cyan-dim), transparent);
+  border: 1px solid rgba(0,212,255,.22); border-radius: 100px;
+  font-size: 12px; font-weight: 600; color: var(--cyan); margin-bottom: 24px; backdrop-filter: blur(10px);
 }
-
-.login-section {
-  flex: 1; display: flex; align-items: center; justify-content: center;
-  padding: 1rem 1rem 2.5rem;
+.badge-dot {
+  width: 6px; height: 6px; background: var(--cyan); border-radius: 50%;
+  box-shadow: 0 0 10px var(--cyan); animation: pulse 2s infinite;
 }
-.login-card {
-  width: 100%; max-width: 420px;
-  background: linear-gradient(165deg, rgba(12,20,32,0.96) 0%, rgba(6,12,20,0.98) 100%);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  padding: 2rem 1.75rem 1.85rem;
-  backdrop-filter: blur(24px);
-  position: relative; overflow: hidden;
-  box-shadow:
-    0 24px 64px -16px rgba(0,0,0,.7),
-    0 0 80px -28px rgba(0,212,255,.18);
-  opacity: 0;
-  transform: translateY(40px) scale(.96);
-  filter: blur(6px);
-  animation: cardIn 1s var(--ease-out) .35s forwards;
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .4; transform: scale(1.45); }
 }
-@keyframes cardIn {
-  to { opacity: 1; transform: none; filter: blur(0); }
+h1 {
+  font-size: clamp(40px, 5.5vw, 68px); line-height: 1.08; letter-spacing: -.03em;
+  margin: 20px 0 18px; font-weight: 800;
 }
-.login-card::before {
-  content: '';
-  position: absolute; top: 0; left: 10%; right: 10%; height: 1.5px;
-  background: linear-gradient(90deg, transparent, var(--cyan), var(--gold), var(--cyan), transparent);
-  opacity: .75;
-  animation: lineGlow 3.5s ease-in-out infinite;
-}
-@keyframes lineGlow {
-  0%,100% { opacity: .45; }
-  50% { opacity: 1; }
-}
-.login-card::after {
-  content: '';
-  position: absolute; inset: 0; border-radius: 24px;
-  background: radial-gradient(ellipse 90% 50% at 50% -5%, var(--cyan-dim), transparent 55%);
-  pointer-events: none;
-}
-.card-inner { position: relative; z-index: 2; }
-
-.slogan {
-  font-family: 'Space Mono', monospace;
-  font-size: .55rem; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--cyan); text-align: center; margin-bottom: 1.3rem;
-  text-shadow: 0 0 18px var(--cyan-dim); line-height: 1.6;
-}
-
-.auth-tabs {
-  display: flex;
-  background: rgba(255,255,255,.03);
-  border: 1px solid var(--border2);
-  border-radius: 13px; padding: 4px; margin-bottom: 1.5rem; gap: 4px;
-}
-.auth-tab {
-  flex: 1; text-align: center; padding: 11px 8px; border-radius: 10px;
-  font-size: .84rem; font-weight: 600; color: var(--muted);
-  transition: all .3s var(--ease);
-}
-.auth-tab.active {
-  background: linear-gradient(135deg, var(--cyan), #0891b2);
-  color: #000;
-  box-shadow: 0 4px 16px var(--cyan-dim);
-}
-.auth-tab:not(.active):hover {
-  color: var(--text); background: rgba(255,255,255,.04);
-}
-
-.login-title {
-  font-size: clamp(1.55rem, 5vw, 1.95rem);
-  font-weight: 800; letter-spacing: -.02em;
-  margin-bottom: .35rem; line-height: 1.2;
-}
-.login-title .acc {
+h1 span {
   background: linear-gradient(135deg, var(--cyan), var(--gold));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
-.login-sub {
-  font-size: .86rem; color: var(--muted); line-height: 1.65; margin-bottom: 1.45rem;
+.hero-desc { color: var(--muted); line-height: 1.9; font-size: 15px; max-width: 500px; margin-bottom: 32px; }
+.actions { display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 14px;
+  font-weight: 700; font-size: 14px; position: relative; overflow: hidden; transition: var(--t);
+  border: none; cursor: pointer; font-family: Cairo, sans-serif;
 }
+.primary {
+  background: linear-gradient(135deg, var(--cyan), #0891b2); color: #000;
+  box-shadow: 0 8px 28px var(--cyan-dim);
+}
+.primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 14px 40px rgba(0,212,255,.35); }
+.primary:active { transform: translateY(-1px) scale(.98); }
+.secondary {
+  background: rgba(255,255,255,.03); border: 1px solid var(--line); color: var(--text);
+}
+.secondary:hover {
+  border-color: var(--cyan); color: var(--cyan); transform: translateY(-3px); background: var(--cyan-dim);
+}
+.hero-stats { display: flex; gap: 32px; }
+.stat-item { position: relative; }
+.stat-item::after {
+  content: ''; position: absolute; left: -16px; top: 50%; transform: translateY(-50%);
+  width: 1px; height: 30px; background: var(--line);
+}
+.stat-item:first-child::after { display: none; }
+.stat-value {
+  font: 700 26px 'Space Grotesk', sans-serif; color: var(--text); display: block;
+  line-height: 1; margin-bottom: 4px; font-variant-numeric: tabular-nums;
+}
+.stat-label { font-size: 11px; color: var(--muted); }
 
-.form-panel { display: none; opacity: 0; transform: translateY(8px); }
-.form-panel.active {
-  display: block;
-  animation: panelIn .35s var(--ease) forwards;
+.hero-visual { perspective: 1400px; display: flex; align-items: center; justify-content: center; position: relative; }
+.bank-card-wrapper { position: relative; width: 100%; max-width: 460px; transform-style: preserve-3d; }
+.bank-card {
+  position: relative; aspect-ratio: 1.586; padding: 28px 32px; border-radius: 22px;
+  background: linear-gradient(145deg, #0f2a3d 0%, #0a1a28 40%, #071420 100%);
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: 0 40px 80px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.12);
+  overflow: hidden; transform: rotate(4deg); transition: transform .15s ease-out;
 }
-@keyframes panelIn { to { opacity: 1; transform: none; } }
-
-.form-group { margin-bottom: 1.1rem; }
-.form-label {
-  display: block;
-  font-family: 'Space Mono', monospace;
-  font-size: .52rem; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: .4rem; transition: color .25s;
+.bank-card::before {
+  content: ''; position: absolute; inset: 0; border-radius: 22px; padding: 1.5px;
+  background: linear-gradient(135deg, var(--cyan) 0%, transparent 30%, var(--gold) 50%, transparent 70%, var(--cyan) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; opacity: .7;
+  animation: borderRotate 10s linear infinite;
 }
-.form-group:focus-within .form-label { color: var(--cyan); }
-.form-label .opt { color: var(--muted); font-weight: 400; letter-spacing: 0; text-transform: none; font-family: Cairo, sans-serif; font-size: .7rem; }
-
-.input-wrap { position: relative; display: flex; align-items: center; }
-.form-input, .form-select {
-  width: 100%;
-  background: rgba(255,255,255,.03);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 13px 14px 13px 44px;
-  color: var(--text); font-size: .92rem; outline: none;
-  transition: border-color .25s, background .25s, box-shadow .3s var(--ease);
-}
-.form-select {
-  appearance: auto;
-  padding-left: 14px;
-  cursor: pointer;
-}
-.form-input:hover, .form-select:hover { border-color: rgba(0,212,255,.4); }
-.form-input:focus, .form-select:focus {
-  border-color: var(--cyan);
-  background: var(--cyan-dim);
-  box-shadow: 0 0 0 4px rgba(0,212,255,.12);
-}
-.form-input::placeholder { color: var(--muted); opacity: .5; }
-.form-input.has-error, .form-select.has-error {
-  border-color: var(--error);
-  box-shadow: 0 0 0 4px rgba(255,71,87,.12);
-  animation: shake .4s var(--ease);
-}
-@keyframes shake {
-  0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)}
-}
-
-.input-icon {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  left: 14px; width: 18px; height: 18px; color: var(--muted);
-  pointer-events: none; transition: color .25s;
-}
-.form-input:focus ~ .input-icon { color: var(--cyan); }
-
-.toggle-pass {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  left: 8px; width: 34px; height: 34px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--muted); border-radius: 8px;
-  transition: color .25s, background .25s; z-index: 3;
-}
-.toggle-pass:hover { color: var(--cyan); background: var(--cyan-dim); }
-.toggle-pass svg { width: 17px; height: 17px; }
-
-.form-msg {
-  font-size: .75rem; margin-top: .35rem;
-  max-height: 0; opacity: 0; overflow: hidden; transition: all .3s var(--ease);
-}
-.form-msg.show { max-height: 40px; opacity: 1; margin-top: .4rem; }
-.form-msg.error { color: var(--error); }
-
-.form-row {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 1.3rem; gap: .8rem; flex-wrap: wrap;
-}
-.remember {
-  display: flex; align-items: center; gap: 8px;
-  font-size: .82rem; color: var(--muted);
-}
-.remember input {
-  appearance: none; width: 16px; height: 16px;
-  border: 1.5px solid var(--border); border-radius: 4px;
-  position: relative; transition: all .25s; flex-shrink: 0;
-}
-.remember input:checked {
-  background: var(--cyan); border-color: var(--cyan);
-}
-.remember input:checked::after {
-  content: ''; position: absolute; left: 4px; top: 1px;
-  width: 5px; height: 8px; border: solid #000;
-  border-width: 0 2px 2px 0; transform: rotate(45deg);
-}
-.forgot {
-  font-size: .82rem; color: var(--cyan); font-weight: 500; transition: color .25s;
-}
-.forgot:hover { color: #fff; }
-
-.btn-primary {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  width: 100%;
-  background: linear-gradient(135deg, var(--cyan), #0891b2);
-  color: #000; padding: 14px 22px; border-radius: 100px;
-  font-size: .88rem; font-weight: 700;
-  position: relative; overflow: hidden;
-  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
-  box-shadow: 0 8px 26px var(--cyan-dim);
-}
-.btn-primary .shine {
-  position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
-}
-@media (hover: hover) {
-  .btn-primary:hover .shine { left: 130%; transition: left .6s ease; }
-  .btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 34px rgba(0,212,255,.4);
-  }
-}
-.btn-primary:active { transform: translateY(-1px) scale(.98); }
-.btn-primary span, .btn-primary svg { position: relative; z-index: 1; }
-.btn-primary:disabled { opacity: .55; pointer-events: none; }
-
-.btn-loading .btn-text, .btn-loading .btn-arrow { opacity: 0; }
-.btn-loading::after {
-  content: ''; position: absolute; width: 20px; height: 20px;
-  border: 2px solid rgba(0,0,0,.2); border-top-color: #000;
-  border-radius: 50%; animation: spin .6s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.divider {
-  display: flex; align-items: center; gap: 1rem;
-  margin: 1.3rem 0 1.1rem;
-  color: var(--muted); font-size: .58rem; letter-spacing: .12em;
-  text-transform: uppercase; font-family: 'Space Mono', monospace;
-}
-.divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border2), transparent);
-}
-
-.social-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
-.social-btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 11px; border-radius: 12px; font-size: .82rem; font-weight: 600;
-  border: 1px solid var(--border2); background: rgba(255,255,255,.025);
-  color: var(--text); transition: all .3s var(--ease);
-}
-.social-btn:hover {
-  border-color: rgba(0,212,255,.4);
-  background: var(--cyan-dim);
-  transform: translateY(-2px);
-}
-.social-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
-
-.login-footer {
-  margin-top: 1.4rem; text-align: center;
-  font-size: .82rem; color: var(--muted);
-}
-.login-footer a {
-  color: var(--cyan); font-weight: 600; margin-inline-start: 4px; transition: color .25s;
-}
-.login-footer a:hover { color: #fff; }
-
-.status-bar {
-  margin-top: 1.3rem; padding-top: .95rem;
-  border-top: 1px solid var(--border2);
-  display: flex; align-items: center; justify-content: space-between;
-  font-family: 'Space Mono', monospace;
-  font-size: .48rem; letter-spacing: .1em;
-  color: rgba(122,138,158,.5); text-transform: uppercase;
-}
-.status-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--success);
-  box-shadow: 0 0 8px rgba(46,213,115,.5);
-  animation: pulse 2.2s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:.6} 50%{opacity:1} }
-
-/* Success + Complete Profile overlays */
-.success-overlay, .complete-overlay {
+@keyframes borderRotate { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+.card-pattern {
   position: absolute; inset: 0;
-  background: rgba(4,7,12,.97);
-  border-radius: 24px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: .85rem; opacity: 0; pointer-events: none;
-  transition: opacity .5s var(--ease); z-index: 20;
-  padding: 1.5rem;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(0,212,255,.07) 0%, transparent 35%),
+    radial-gradient(circle at 85% 75%, rgba(212,175,55,.05) 0%, transparent 30%),
+    linear-gradient(90deg, transparent 49%, rgba(255,255,255,.015) 50%, transparent 51%),
+    linear-gradient(0deg, transparent 49%, rgba(255,255,255,.015) 50%, transparent 51%);
+  background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+  pointer-events: none; opacity: .9;
 }
-.success-overlay.show, .complete-overlay.show { opacity: 1; pointer-events: all; }
-.success-icon {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: rgba(46,213,115,.12);
-  border: 1.5px solid rgba(46,213,115,.4);
-  display: flex; align-items: center; justify-content: center;
-  animation: scaleIn .5s var(--ease);
+.card-shine {
+  position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.04) 42%, rgba(255,255,255,.14) 50%, rgba(255,255,255,.04) 58%, transparent 70%);
+  transform: translateX(-120%); pointer-events: none; z-index: 5;
 }
-@keyframes scaleIn { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
-.success-icon svg { width: 28px; height: 28px; color: var(--success); }
-.success-text { font-size: 1.15rem; font-weight: 700; }
-.success-sub { font-size: .84rem; color: var(--muted); text-align: center; padding: 0 1rem; }
+.bank-card:hover .card-shine { transform: translateX(120%); transition: transform 1s ease; }
+.card-hologram {
+  position: absolute; top: 24px; right: 28px; width: 56px; height: 56px; border-radius: 50%;
+  background: conic-gradient(from 0deg, var(--cyan), var(--gold), var(--cyan), transparent 70%);
+  filter: blur(14px); opacity: .55; animation: holoPulse 4s ease-in-out infinite; z-index: 1;
+}
+@keyframes holoPulse {
+  0%,100% { opacity: .4; transform: scale(1); }
+  50% { opacity: .75; transform: scale(1.2); }
+}
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; direction: ltr; position: relative; z-index: 3; }
+.chip {
+  width: 52px; height: 38px;
+  background: linear-gradient(145deg, #f0d78c, #c9a227 40%, #a8861a);
+  border-radius: 7px; position: relative;
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.35), inset 0 -2px 4px rgba(0,0,0,.25), 0 3px 10px rgba(0,0,0,.4);
+  overflow: hidden;
+}
+.chip::before { content: ''; position: absolute; inset: 5px; border: 1.2px solid rgba(255,255,255,.28); border-radius: 3px; }
+.chip::after {
+  content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 12px; height: 14px; border: 1.2px solid rgba(255,255,255,.3); border-radius: 2px;
+  background: linear-gradient(90deg, transparent 40%, rgba(255,255,255,.15) 50%, transparent 60%);
+}
+.card-logo { font: 700 15px 'Space Grotesk', sans-serif; letter-spacing: .22em; color: rgba(255,255,255,.92); text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+.card-number {
+  font: 500 23px 'Space Grotesk', sans-serif; letter-spacing: .18em; direction: ltr;
+  margin-top: 48px; color: #f4f9ff; position: relative; z-index: 3;
+  text-shadow: 0 2px 6px rgba(0,0,0,.45); font-variant-numeric: tabular-nums;
+}
+.card-bottom { display: flex; justify-content: space-between; align-items: flex-end; direction: ltr; margin-top: 28px; position: relative; z-index: 3; }
+.card-holder-label, .card-expiry-label { font-size: 9px; text-transform: uppercase; letter-spacing: .12em; color: rgba(255,255,255,.45); margin-bottom: 5px; }
+.card-holder-name, .card-expiry-value { font: 500 13px 'Space Grotesk', sans-serif; color: rgba(255,255,255,.95); letter-spacing: .06em; }
+.card-brand { font: 700 30px 'Space Grotesk', sans-serif; color: var(--gold); opacity: .95; text-shadow: 0 0 24px var(--gold-dim); line-height: 1; }
+.card-stripe {
+  position: absolute; left: 0; right: 0; top: 58%; height: 38px;
+  background: linear-gradient(90deg, rgba(0,0,0,.55) 0%, rgba(20,20,30,.7) 20%, rgba(0,0,0,.5) 50%, rgba(20,20,30,.7) 80%, rgba(0,0,0,.55) 100%);
+  opacity: .35; z-index: 2; pointer-events: none;
+}
+.float-badge {
+  position: absolute; background: rgba(12,18,28,.94); border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 18px; backdrop-filter: blur(20px); box-shadow: 0 14px 40px rgba(0,0,0,.45);
+  font-size: 11px; z-index: 10; animation: floatY 6s ease-in-out infinite;
+}
+.float-badge .value { font: 700 18px 'Space Grotesk', sans-serif; color: var(--cyan); display: block; margin-bottom: 2px; }
+.float-badge .label { color: var(--muted); font-size: 10px; }
+.float-1 { top: -8px; left: -36px; }
+.float-2 { bottom: 20px; right: -28px; animation-delay: 3s; }
+@keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
 
-.complete-overlay .complete-box {
-  width: 100%; max-width: 320px;
+.ticker-wrap {
+  background: linear-gradient(90deg, rgba(0,212,255,.05), rgba(212,175,55,.05));
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  overflow: hidden; padding: 14px 0; position: relative; z-index: 2;
 }
-.complete-overlay .login-title { font-size: 1.35rem; margin-bottom: .5rem; text-align: center; }
-.complete-overlay .login-sub { text-align: center; margin-bottom: 1.2rem; font-size: .82rem; }
+.ticker { display: inline-flex; white-space: nowrap; animation: tickerMove 35s linear infinite; gap: 40px; }
+.ticker-item { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); font-family: 'Space Grotesk', monospace; }
+.ticker-item .symbol { color: var(--cyan); font-weight: 700; }
+.ticker-item .up { color: var(--success); }
+.ticker-item .down { color: var(--danger); }
+@keyframes tickerMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+.ticker-wrap:hover .ticker { animation-play-state: paused; }
 
-@media (max-width: 768px) {
-  .orb-1 { width: 260px; height: 260px; filter: blur(60px); }
-  .orb-2 { width: 180px; height: 180px; filter: blur(50px); }
-  .orb-3 { display: none; }
-  .grid-overlay { opacity: .5; }
-  header { padding: 1rem 1rem; }
-  .login-card {
-    border-radius: 20px;
-    padding: 1.75rem 1.4rem 1.6rem;
-    box-shadow: 0 16px 48px -12px rgba(0,0,0,.65);
-  }
+section { position: relative; z-index: 2; }
+.section { padding: 100px 0; }
+.section-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 40px; }
+.section-label {
+  font: 600 11px 'Space Grotesk', sans-serif; letter-spacing: .2em; color: var(--cyan);
+  text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+}
+.section-title { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -.02em; }
+.section-desc { color: var(--muted); font-size: 14px; max-width: 320px; line-height: 1.7; }
+
+.stats-section { padding: 60px 0; }
+.stats-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.stat-box {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 28px 20px; text-align: center; transition: var(--t);
+}
+.stat-box:hover { border-color: rgba(0,212,255,.25); transform: translateY(-4px); }
+.stat-box-number { font: 800 32px 'Space Grotesk', sans-serif; color: var(--cyan); display: block; margin-bottom: 6px; }
+.stat-box-label { font-size: 13px; color: var(--muted); }
+
+.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.step-card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 32px 24px; transition: var(--t); position: relative; overflow: hidden;
+}
+.step-card:hover { border-color: rgba(0,212,255,.3); transform: translateY(-4px); }
+.step-number {
+  font: 800 48px 'Space Grotesk', sans-serif; color: var(--cyan-dim); line-height: 1; margin-bottom: 16px;
+  -webkit-text-stroke: 1px rgba(0,212,255,.3);
+}
+.step-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+.step-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.feature-card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 28px 22px; transition: var(--t);
+}
+.feature-card:hover { border-color: rgba(0,212,255,.3); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.25); }
+.feature-icon { font-size: 28px; margin-bottom: 14px; color: var(--cyan); }
+.feature-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.feature-desc { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+.dashboard-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
+.dashboard-panel {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px;
+}
+.balance-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.balance-amount { font: 800 36px 'Space Grotesk', sans-serif; margin-bottom: 20px; color: var(--cyan); }
+.balance-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.balance-row span { color: var(--muted); }
+.activity-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+.activity-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.activity-name { color: var(--muted); }
+
+.security-section { padding: 100px 0; }
+.security-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.security-card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 28px 20px; text-align: center; transition: var(--t);
+}
+.security-card:hover { border-color: rgba(0,212,255,.3); transform: translateY(-4px); }
+.security-icon { font-size: 32px; display: block; margin-bottom: 12px; }
+.security-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.security-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+.faq-container { max-width: 700px; }
+.faq-item { border: 1px solid var(--line); border-radius: 14px; margin-bottom: 10px; overflow: hidden; background: var(--surface); }
+.faq-question {
+  display: flex; justify-content: space-between; align-items: center; padding: 18px 20px;
+  font-weight: 600; font-size: 14px; cursor: pointer; transition: background .25s;
+}
+.faq-question:hover { background: rgba(255,255,255,.02); }
+.faq-icon { font-size: 18px; color: var(--cyan); transition: transform .3s; }
+.faq-item.open .faq-icon { transform: rotate(45deg); }
+.faq-answer { max-height: 0; overflow: hidden; transition: max-height .4s ease, padding .3s; }
+.faq-item.open .faq-answer { max-height: 200px; padding: 0 20px 18px; }
+.faq-answer p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+.cta-box {
+  background: linear-gradient(135deg, rgba(0,212,255,.08), rgba(212,175,55,.06));
+  border: 1px solid rgba(0,212,255,.2); border-radius: 24px; padding: 48px 40px;
+  display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap;
+}
+.cta-title { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+.cta-desc { color: var(--muted); font-size: 14px; }
+.cta-form { display: flex; gap: 10px; flex-wrap: wrap; }
+.cta-input {
+  background: rgba(0,0,0,.3); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 18px; color: var(--text); min-width: 240px; font-size: 14px;
+}
+.cta-input:focus { border-color: var(--cyan); }
+
+footer {
+  border-top: 1px solid var(--line); padding: 48px 0 32px; position: relative; z-index: 2;
+}
+.footer-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+.footer-brand { display: flex; align-items: center; gap: 10px; font: 700 16px 'Space Grotesk', sans-serif; letter-spacing: .1em; direction: ltr; }
+.footer-brand .crest { width: 32px; height: 32px; font-size: 14px; }
+.footer-trust { display: flex; gap: 10px; flex-wrap: wrap; }
+.trust-badge {
+  font-size: 11px; padding: 6px 12px; border-radius: 100px; border: 1px solid var(--line);
+  color: var(--muted); background: rgba(255,255,255,.02);
+}
+.footer-links { display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; }
+.footer-links a { font-size: 13px; color: var(--muted); transition: color .25s; }
+.footer-links a:hover { color: var(--cyan); }
+.footer-bottom { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); flex-wrap: wrap; gap: 8px; border-top: 1px solid var(--line); padding-top: 20px; }
+
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: #0f1724; border: 1px solid rgba(0,212,255,.25); border-radius: 14px;
+  padding: 12px 20px; font-size: 13px; display: flex; align-items: center; gap: 10px;
+  z-index: 10000; opacity: 0; transition: .4s; box-shadow: 0 12px 40px rgba(0,0,0,.4);
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast-icon {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--success); color: #000;
+  display: grid; place-items: center; font-size: 12px; font-weight: 700;
 }
 
-@media (max-width: 480px) {
-  header { padding: .9rem .9rem; }
-  .crest { width: 32px; height: 32px; font-size: 16px; }
-  .logo-name span:first-child { font-size: .85rem; }
-  .back-home { padding: 7px 11px; font-size: .68rem; }
-  .back-home svg { width: 13px; height: 13px; }
-  .login-section { padding: .8rem .8rem 2rem; }
-  .login-card { padding: 1.6rem 1.2rem 1.45rem; border-radius: 18px; }
-  .slogan { font-size: .5rem; letter-spacing: .14em; margin-bottom: 1.1rem; }
-  .auth-tabs { margin-bottom: 1.3rem; }
-  .auth-tab { padding: 10px 6px; font-size: .8rem; }
-  .login-title { font-size: 1.45rem; }
-  .login-sub { font-size: .82rem; margin-bottom: 1.25rem; }
-  .form-input, .form-select { padding: 12px 12px 12px 42px; font-size: .9rem; }
-  .form-select { padding-left: 12px; }
-  .form-row { margin-bottom: 1.15rem; }
-  .btn-primary { padding: 13px 18px; font-size: .85rem; }
-  .social-row { grid-template-columns: 1fr; gap: .5rem; }
-  .status-bar { flex-direction: column; gap: .35rem; text-align: center; }
+.mobile-menu {
+  display: none; position: fixed; inset: 0; top: 114px; background: rgba(4,7,12,.97);
+  z-index: 99; padding: 24px; flex-direction: column; gap: 16px;
 }
+.mobile-menu.open { display: flex; }
+.mobile-menu a { font-size: 16px; font-weight: 600; color: var(--text); padding: 12px 0; border-bottom: 1px solid var(--line); }
 
-@media (max-width: 360px) {
-  .login-card { padding: 1.4rem 1rem 1.3rem; }
-  .login-title { font-size: 1.35rem; }
-  .form-row { flex-direction: column; align-items: flex-start; gap: .6rem; }
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; padding: 120px 0 60px; gap: 40px; }
+  .hero-visual { order: -1; }
+  .bank-card { transform: rotate(0deg) !important; max-width: 360px; margin: 0 auto; }
+  .float-1, .float-2 { display: none; }
+  .stats-container, .steps-grid, .features-grid, .security-grid { grid-template-columns: 1fr 1fr; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .links { display: none; }
+  .mobile-menu-btn { display: grid; }
+  .section-header { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 560px) {
+  .wrap { width: calc(100% - 28px); }
+  .stats-container, .steps-grid, .features-grid, .security-grid { grid-template-columns: 1fr; }
+  .hero-stats { flex-wrap: wrap; gap: 20px; }
+  .stat-item::after { display: none; }
+  .cta-box { padding: 32px 20px; }
+  .cta-input { min-width: 100%; }
+  .actions { flex-direction: column; }
+  .btn { justify-content: center; }
 }
 </style>
 </head>
 <body>
 
-<div id="loader">
-  <div class="loader-logo">SHIRO BANK</div>
-  <div class="loader-bar-wrap"><div class="loader-bar" id="loaderBar"></div></div>
-  <div class="loader-pct" id="loaderPct">0%</div>
+<div id="preloader">
+  <div class="loader-ring"></div>
+  <div class="loader-text">SHIRO BANK</div>
+  <div class="loader-bar"></div>
 </div>
 
-<div id="cursor-dot"></div>
-<div id="cursor-ring"></div>
-<canvas id="bg-canvas"></canvas>
-<div id="noise"></div>
-<div class="grid-overlay"></div>
-<div class="vignette"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursor-dot"></div>
+<div class="progress-bar" id="progress-bar"></div>
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+<canvas id="particles"></canvas>
 
-<div class="wrap">
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
+<div class="top">
+  <div class="wrap">
+    <span>البنك المركزي لمملكة Shiro</span>
+    <span class="live-clock" id="live-clock">--:--:-- UTC</span>
+  </div>
+</div>
 
-  <header>
-    <a href="#" class="logo hover-target" onclick="history.back(); return false;">
+<header id="header">
+  <nav class="wrap">
+    <a href="#" class="brand">
       <div class="crest">城</div>
-      <div class="logo-name">
-        <span>SHIRO</span>
-        <span>BANK</span>
-      </div>
+      <strong>SHIRO</strong>
     </a>
-    <a href="#" class="back-home hover-target" onclick="history.back(); return false;">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M19 12H5M12 19l-7-7 7-7"/>
-      </svg>
-      <span>الرئيسية</span>
-    </a>
-  </header>
-
-  <section class="login-section">
-    <div class="login-card" id="loginCard">
-      <div class="card-inner">
-        <div class="slogan">ثروة المملكة تحت حماية العرش</div>
-
-        <div class="auth-tabs">
-          <button class="auth-tab active hover-target" data-tab="login">تسجيل الدخول</button>
-          <button class="auth-tab hover-target" data-tab="register">إنشاء حساب</button>
-        </div>
-
-        <!-- Login -->
-        <div class="form-panel active" id="panel-login">
-          <h1 class="login-title">مرحبًا <span class="acc">بعودتك</span></h1>
-          <p class="login-sub">سجّل دخولك باللقب أو رقم العضو أو الإيميل للوصول إلى محفظتك.</p>
-
-          <form id="loginForm" novalidate>
-            <div class="form-group">
-              <label class="form-label">اللقب / الرقم / الإيميل</label>
-              <div class="input-wrap">
-                <input type="text" id="loginId" class="form-input hover-target" placeholder="لقبك أو SHR-2048 أو بريدك" required autocomplete="username">
-                <span class="input-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                  </svg>
-                </span>
-              </div>
-              <div class="form-msg" id="loginIdMsg"></div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">كلمة المرور</label>
-              <div class="input-wrap">
-                <input type="password" id="loginPass" class="form-input hover-target" placeholder="••••••••" required autocomplete="current-password">
-                <button type="button" class="toggle-pass hover-target" data-target="loginPass" aria-label="إظهار كلمة المرور">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                  </svg>
-                </button>
-              </div>
-              <div class="form-msg" id="loginPassMsg"></div>
-            </div>
-
-            <div class="form-row">
-              <label class="remember hover-target">
-                <input type="checkbox">
-                <span>تذكرني</span>
-              </label>
-              <a href="#" class="forgot hover-target">نسيت كلمة المرور؟</a>
-            </div>
-
-            <button type="submit" class="btn-primary hover-target" id="loginBtn">
-              <span class="shine"></span>
-              <span class="btn-text">دخول البنك</span>
-              <svg class="btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </button>
-          </form>
-        </div>
-
-        <!-- Register -->
-        <div class="form-panel" id="panel-register">
-          <h1 class="login-title">انضم إلى <span class="acc">المملكة</span></h1>
-          <p class="login-sub">أنشئ حسابك باللقب والنقابة وابدأ جمع النقاط داخل البنك.</p>
-
-          <form id="registerForm" novalidate>
-            <div class="form-group">
-              <label class="form-label">اللقب</label>
-              <div class="input-wrap">
-                <input type="text" id="regNick" class="form-input hover-target" placeholder="لقبك داخل المملكة" required autocomplete="nickname">
-                <span class="input-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                  </svg>
-                </span>
-              </div>
-              <div class="form-msg" id="regNickMsg"></div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">النقابة</label>
-              <div class="input-wrap">
-                <select id="regGuild" class="form-select hover-target" required>
-                  <option value="">— اختر نقابتك —</option>
-                  <option value="VIOD">VIOD</option>
-                  <option value="أنمي العرب">أنمي العرب</option>
-                  <option value="أوتاكو مصر">أوتاكو مصر</option>
-                  <option value="ون بيس">ون بيس</option>
-                  <option value="ناروتو">ناروتو</option>
-                  <option value="بليتش">بليتش</option>
-                  <option value="هجوم العمالقة">هجوم العمالقة</option>
-                  <option value="جوجوتسو">جوجوتسو</option>
-                  <option value="ون بنش">ون بنش</option>
-                  <option value="ديمون سلاير">ديمون سلاير</option>
-                </select>
-              </div>
-              <div class="form-msg" id="regGuildMsg"></div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">البريد الإلكتروني <span class="opt">(اختياري)</span></label>
-              <div class="input-wrap">
-                <input type="email" id="regEmail" class="form-input hover-target" placeholder="بريدك@مثال.com" autocomplete="email">
-                <span class="input-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                    <polyline points="22,6 12,13 2,6"/>
-                  </svg>
-                </span>
-              </div>
-              <div class="form-msg" id="regEmailMsg"></div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">كلمة المرور</label>
-              <div class="input-wrap">
-                <input type="password" id="regPass" class="form-input hover-target" placeholder="••••••••" required autocomplete="new-password">
-                <button type="button" class="toggle-pass hover-target" data-target="regPass">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                  </svg>
-                </button>
-              </div>
-              <div class="form-msg" id="regPassMsg"></div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">تأكيد كلمة المرور</label>
-              <div class="input-wrap">
-                <input type="password" id="regConfirm" class="form-input hover-target" placeholder="••••••••" required autocomplete="new-password">
-                <button type="button" class="toggle-pass hover-target" data-target="regConfirm">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                  </svg>
-                </button>
-              </div>
-              <div class="form-msg" id="regConfirmMsg"></div>
-            </div>
-
-            <button type="submit" class="btn-primary hover-target" id="regBtn">
-              <span class="shine"></span>
-              <span class="btn-text">إنشاء حساب</span>
-              <svg class="btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </button>
-          </form>
-        </div>
-
-        <div class="divider"><span>أو تابع عبر</span></div>
-
-        <div class="social-row">
-          <button class="social-btn hover-target" type="button" onclick="startSocial('google')">
-            <svg viewBox="0 0 24 24">
-              <path fill="#EA4335" d="M5.27 9.76A7.08 7.08 0 0112 4.91c1.69 0 3.21.6 4.4 1.58L19.91 3C17.78 1.14 15.05 0 12 0 7.31 0 3.26 2.7 1.34 6.61l3.93 3.15z"/>
-              <path fill="#34A853" d="M16.04 18.01A6.91 6.91 0 0112 19.09a7.07 7.07 0 01-6.72-4.94l-3.94 3.07A12 12 0 0012 24c2.93 0 5.73-.98 7.88-2.81l-3.84-3.18z"/>
-              <path fill="#4A90E2" d="M19.88 21.19C22.08 19.24 23.45 16.16 23.45 12c0-.74-.07-1.45-.2-2.14H12v4.27h6.45a5.5 5.5 0 01-2.41 3.61l3.84 3.18z"/>
-              <path fill="#FBBC05" d="M5.28 14.15A7.1 7.1 0 014.91 12c0-.75.13-1.47.36-2.15L1.34 6.61A11.94 11.94 0 000 12c0 1.93.46 3.75 1.28 5.37l4-3.22z"/>
-            </svg>
-            <span>Google</span>
-          </button>
-          <button class="social-btn hover-target" type="button" onclick="startSocial('discord')">
-            <svg viewBox="0 0 24 24" fill="#5865F2">
-              <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.09 14.09 0 001.226-1.994.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-            </svg>
-            <span>Discord</span>
-          </button>
-        </div>
-
-        <div class="login-footer">
-          تحتاج مساعدة؟
-          <a href="#" class="hover-target">تواصل معنا</a>
-        </div>
-
-        <div class="status-bar">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="status-dot"></span>
-            <span>أنظمة البنك متصلة</span>
-          </div>
-          <span>SHIRO · 2026</span>
-        </div>
+    <ul class="links">
+      <li><a href="#how">كيف يعمل</a></li>
+      <li><a href="#features">الميزات</a></li>
+      <li><a href="#account">حسابك</a></li>
+      <li><a href="#security">الأمان</a></li>
+      <li><a href="#faq">أسئلة</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="theme-switcher">
+        <button class="theme-dot active" data-theme-dot="cyan" title="Cyan"></button>
+        <button class="theme-dot" data-theme-dot="purple" title="Purple"></button>
+        <button class="theme-dot" data-theme-dot="gold" title="Gold"></button>
+        <button class="theme-dot" data-theme-dot="pink" title="Pink"></button>
       </div>
+      <a href="login.html" class="navbtn">دخول البنك</a>
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="القائمة">☰</button>
+    </div>
+  </nav>
+</header>
 
-      <!-- Complete profile after social -->
-      <div class="complete-overlay" id="completeOverlay">
-        <div class="complete-box">
-          <h2 class="login-title">أكمل <span class="acc">بياناتك</span></h2>
-          <p class="login-sub">قبل دخول البنك، اختر لقبك ونقابتك</p>
-          <form id="completeForm" novalidate>
-            <div class="form-group">
-              <label class="form-label">اللقب</label>
-              <div class="input-wrap">
-                <input type="text" id="compNick" class="form-input hover-target" placeholder="لقبك داخل المملكة" required>
-                <span class="input-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                  </svg>
-                </span>
-              </div>
-              <div class="form-msg" id="compNickMsg"></div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">النقابة</label>
-              <select id="compGuild" class="form-select hover-target" required>
-                <option value="">— اختر نقابتك —</option>
-                <option value="VIOD">VIOD</option>
-                <option value="أنمي العرب">أنمي العرب</option>
-                <option value="أوتاكو مصر">أوتاكو مصر</option>
-                <option value="ون بيس">ون بيس</option>
-                <option value="ناروتو">ناروتو</option>
-                <option value="بليتش">بليتش</option>
-                <option value="هجوم العمالقة">هجوم العمالقة</option>
-                <option value="جوجوتسو">جوجوتسو</option>
-                <option value="ون بنش">ون بنش</option>
-                <option value="ديمون سلاير">ديمون سلاير</option>
-              </select>
-              <div class="form-msg" id="compGuildMsg"></div>
-            </div>
-            <button type="submit" class="btn-primary hover-target" id="compBtn">
-              <span class="shine"></span>
-              <span class="btn-text">دخول البنك</span>
-            </button>
-          </form>
-        </div>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#how" onclick="toggleMobileMenu()">كيف يعمل</a>
+  <a href="#features" onclick="toggleMobileMenu()">الميزات</a>
+  <a href="#account" onclick="toggleMobileMenu()">حسابك</a>
+  <a href="#security" onclick="toggleMobileMenu()">الأمان</a>
+  <a href="#faq" onclick="toggleMobileMenu()">أسئلة</a>
+  <a href="login.html" class="btn primary" style="margin-top:12px;text-align:center">دخول البنك</a>
+</div>
+
+<main>
+<section class="hero wrap">
+  <div class="hero-copy">
+    <div class="badge"><span class="badge-dot"></span> نظام داخلي معتمد</div>
+    <h1>بنك المملكة<br><span>المركزي</span></h1>
+    <p class="hero-desc">
+      البنك المركزي الداخلي لمملكة Shiro — لإدارة نقاط الأعضاء والنقابات والمزايا الرسمية داخل المملكة في مكان واحد آمن ومنظم.
+    </p>
+    <div class="actions">
+      <a href="login.html" class="btn primary">دخول البنك ↗</a>
+      <a href="#how" class="btn secondary">كيف يعمل؟</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-value" data-counter="2847">0</span>
+        <span class="stat-label">أعضاء</span>
       </div>
-
-      <!-- Success -->
-      <div class="success-overlay" id="successOverlay">
-        <div class="success-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-        </div>
-        <div class="success-text" id="successTitle">تم الدخول بنجاح</div>
-        <div class="success-sub">جاري التحويل إلى لوحة الحساب...</div>
+      <div class="stat-item">
+        <span class="stat-value" data-counter="43">0</span>
+        <span class="stat-label">نقابات</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">24/7</span>
+        <span class="stat-label">تشغيل</span>
       </div>
     </div>
-  </section>
+  </div>
+
+  <div class="hero-visual">
+    <div class="bank-card-wrapper" id="card-wrapper">
+      <div class="float-badge float-1">
+        <span class="value">+850</span>
+        <span class="label">آخر مكافأة</span>
+      </div>
+      <div class="float-badge float-2">
+        <span class="value">Gold</span>
+        <span class="label">رتبتك</span>
+      </div>
+      <div class="bank-card" id="bank-card">
+        <div class="card-pattern"></div>
+        <div class="card-shine"></div>
+        <div class="card-hologram"></div>
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div style="display:flex;align-items:center">
+            <div class="chip"></div>
+          </div>
+          <div class="card-logo">SHIRO BANK</div>
+        </div>
+        <div class="card-number">SHR • 0000 • 2048</div>
+        <div class="card-bottom">
+          <div>
+            <div class="card-holder-label">النقابة</div>
+            <div class="card-holder-name">VIOD</div>
+          </div>
+          <div>
+            <div class="card-expiry-label">الرتبة</div>
+            <div class="card-expiry-value">سفير</div>
+          </div>
+          <div class="card-brand">城</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker-wrap" aria-hidden="true">
+  <div class="ticker" id="ticker">
+    <span class="ticker-item"><span class="symbol">SHIRO</span><span class="up">▲ +2.4%</span></span>
+    <span class="ticker-item"><span class="symbol">ANIME</span><span class="up">▲ +5.1%</span></span>
+    <span class="ticker-item"><span class="symbol">OTAKU</span><span class="down">▼ -1.2%</span></span>
+    <span class="ticker-item"><span class="symbol">MANGA</span><span class="up">▲ +3.8%</span></span>
+    <span class="ticker-item"><span class="symbol">GUILD</span><span class="up">▲ +4.2%</span></span>
+    <span class="ticker-item"><span class="symbol">QUEST</span><span class="down">▼ -0.8%</span></span>
+    <span class="ticker-item"><span class="symbol">EVENT</span><span class="up">▲ +6.5%</span></span>
+    <span class="ticker-item"><span class="symbol">VIOD</span><span class="up">▲ +3.1%</span></span>
+  </div>
+</div>
+
+<section class="stats-section wrap">
+  <div class="stats-container">
+    <div class="stat-box">
+      <span class="stat-box-number" data-counter="2847">0</span>
+      <span class="stat-box-label">أعضاء المملكة</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-box-number" data-counter="156420">0</span>
+      <span class="stat-box-label">نقاط المملكة</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-box-number" data-counter="43">0</span>
+      <span class="stat-box-label">نقابات معتمدة</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-box-number">24/7</span>
+      <span class="stat-box-label">تشغيل البنك</span>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-label">How It Works</div>
+        <h2 class="section-title">كيف يعمل النظام؟</h2>
+      </div>
+      <p class="section-desc">ثلاث خطوات بسيطة لاستخدام بنك المملكة.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h3 class="step-title">انضم إلى المجتمع</h3>
+        <p class="step-desc">كن عضوًا في مملكة Shiro أو إحدى نقاباتها المعتمدة.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h3 class="step-title">شارك واكسب</h3>
+        <p class="step-desc">شارك في فعاليات المملكة ونقاباتها، واحصل على نقاطك.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h3 class="step-title">استبدل نقاطك</h3>
+        <p class="step-desc">استبدل نقاطك بالرتب والمزايا والزيارات المعتمدة من المملكة.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="features">
+  <div class="wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Features</div>
+        <h2 class="section-title">أدوات بنك المملكة</h2>
+      </div>
+      <p class="section-desc">نظام داخلي موحد لأعضاء المملكة ونقاباتها.</p>
+    </div>
+    <div class="features-grid">
+      <article class="feature-card">
+        <div class="feature-icon">◈</div>
+        <h3 class="feature-title">محفظة النقاط</h3>
+        <p class="feature-desc">تابع رصيد نقاطك وسجل مكافآتك وعمليات الاستبدال.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon">⇄</div>
+        <h3 class="feature-title">تحويل النقاط</h3>
+        <p class="feature-desc">حوّل النقاط إلى أعضاء المملكة وفق صلاحيات النظام.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon">▣</div>
+        <h3 class="feature-title">هوية العضو</h3>
+        <p class="feature-desc">بطاقة عضوية تثبت انتماءك لمملكة Shiro ونقابتك.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon">🏰</div>
+        <h3 class="feature-title">زيارات النقابات</h3>
+        <p class="feature-desc">اطلب زيارة لنقابة بمدة محددة واحصل على تذكرة معتمدة.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon">🎁</div>
+        <h3 class="feature-title">متجر المملكة</h3>
+        <p class="feature-desc">استبدل نقاطك برتب وشارات ومزايا رسمية.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3 class="feature-title">سجل واضح</h3>
+        <p class="feature-desc">كل عملية نقاط مسجّلة وواضحة داخل حسابك.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="account">
+  <div class="wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Your Account</div>
+        <h2 class="section-title">لمحة عن حسابك</h2>
+      </div>
+      <p class="section-desc">لوحة تجريبية توضح شكل حساب العضو داخل البنك.</p>
+    </div>
+    <div class="dashboard-grid">
+      <div class="dashboard-panel">
+        <div class="balance-label">رصيد نقاط المملكة</div>
+        <div class="balance-amount">12,480</div>
+        <div class="balance-row"><span>معرّف العضو</span><b>SHR •••• 2048</b></div>
+        <div class="balance-row"><span>النقابة</span><b>VIOD</b></div>
+        <div class="balance-row"><span>الرتبة</span><b style="color:var(--gold)">سفير</b></div>
+        <div class="balance-row"><span>الحالة</span><b style="color:var(--success)">● نشط</b></div>
+        <div class="balance-row"><span>آخر تحديث</span><b id="live-time">--:--</b></div>
+      </div>
+      <div class="dashboard-panel">
+        <h3 class="activity-title">آخر العمليات</h3>
+        <div class="activity-item"><span class="activity-name">مكافأة فعالية</span><span style="color:var(--success)">+850</span></div>
+        <div class="activity-item"><span class="activity-name">استبدال رتبة</span><span style="color:var(--danger)">-1,200</span></div>
+        <div class="activity-item"><span class="activity-name">تحويل من سارة</span><span style="color:var(--success)">+300</span></div>
+        <div class="activity-item"><span class="activity-name">طلب زيارة VIOD</span><span style="color:var(--danger)">-500</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="security-section" id="security">
+  <div class="wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Security</div>
+        <h2 class="section-title">أمان بنك المملكة</h2>
+      </div>
+      <p class="section-desc">حماية متعددة الطبقات لنقاطك وبياناتك.</p>
+    </div>
+    <div class="security-grid">
+      <div class="security-card">
+        <span class="security-icon">🔐</span>
+        <h3 class="security-title">تشفير كامل</h3>
+        <p class="security-desc">بياناتك مشفرة داخل خوادم المملكة.</p>
+      </div>
+      <div class="security-card">
+        <span class="security-icon">🛡️</span>
+        <h3 class="security-title">حماية الحساب</h3>
+        <p class="security-desc">تسجيل دخول آمن لكل أعضاء Shiro.</p>
+      </div>
+      <div class="security-card">
+        <span class="security-icon">📋</span>
+        <h3 class="security-title">سجل الشفافية</h3>
+        <p class="security-desc">كل عملية مسجلة وقابلة للمراجعة.</p>
+      </div>
+      <div class="security-card">
+        <span class="security-icon">⚡</span>
+        <h3 class="security-title">مراقبة فورية</h3>
+        <p class="security-desc">كشف فوري لأي نشاط مشبوه.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-label">FAQ</div>
+        <h2 class="section-title">الأسئلة الرسمية</h2>
+      </div>
+      <p class="section-desc">إجابات سريعة</p>
+    </div>
+    <div class="faq-container">
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)" role="button" tabindex="0" aria-expanded="false">
+          <span>كيف أكسب النقاط؟</span><span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer"><p>من المشاركة في فعاليات المملكة والنقابات والمسابقات وفق قواعد كل مجتمع.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)" role="button" tabindex="0" aria-expanded="false">
+          <span>هل النظام مجاني؟</span><span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer"><p>البنك مخصص لمملكة Shiro ونقاباتها فقط، والصلاحيات تحددها إدارة المملكة.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)" role="button" tabindex="0" aria-expanded="false">
+          <span>هل أقدر أحوّل نقاطًا لعضو آخر؟</span><span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer"><p>نعم، إذا كانت خاصية التحويل مفعّلة ووفق قواعد إدارة Shiro.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)" role="button" tabindex="0" aria-expanded="false">
+          <span>كيف أطلب زيارة لنقابة؟</span><span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer"><p>من المتجر اختر قسم الزيارات، حدّد النقابة والمدة، وقدّم الطلب. بعد موافقة الأدمن تصلك تذكرة دخول.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="join">
+  <div class="wrap">
+    <div class="cta-box">
+      <div>
+        <h2 class="cta-title">انضم لبنك المملكة الآن</h2>
+        <p class="cta-desc">ادخل بحسابك وابدأ إدارة نقاطك ومزاياك داخل المملكة</p>
+      </div>
+      <a href="login.html" class="btn primary">دخول البنك ↗</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="crest">城</span>
+        <span>SHIRO BANK</span>
+      </div>
+      <div class="footer-trust">
+        <span class="trust-badge">🔒 نظام داخلي</span>
+        <span class="trust-badge">✅ نقاط المملكة فقط</span>
+        <span class="trust-badge">🛡️ لأعضاء Shiro</span>
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="#">الخصوصية</a>
+      <a href="#">الشروط</a>
+      <a href="#">تواصل معنا</a>
+      <a href="#">ديسكورد</a>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Shiro Kingdom — البنك المركزي للمملكة</span>
+      <span>الأمان · الانتماء · راية واحدة</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <span class="toast-icon">✓</span>
+  <span id="toast-message"></span>
 </div>
 
 <script>
-const isTouch = matchMedia('(hover: none), (pointer: coarse)').matches;
-const isMobile = matchMedia('(max-width: 768px)').matches;
-
-document.querySelectorAll('.auth-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-  });
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('preloader').classList.add('hide'), 1800);
 });
 
-document.querySelectorAll('.toggle-pass').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const input = document.getElementById(btn.dataset.target);
-    const isPass = input.type === 'password';
-    input.type = isPass ? 'text' : 'password';
-    btn.querySelector('svg').innerHTML = isPass
-      ? `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`
-      : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
-  });
-});
-
-function showMsg(el, text) {
-  el.textContent = text;
-  el.className = 'form-msg error show';
-}
-function hideMsg(el) {
-  el.className = 'form-msg';
-  el.textContent = '';
-}
-
-function showSuccess(title) {
-  document.getElementById('successTitle').textContent = title;
-  document.getElementById('successOverlay').classList.add('show');
-  setTimeout(() => {
-    document.getElementById('successOverlay').classList.remove('show');
-    // location.href = 'dashboard.html';
-  }, 2200);
-}
-
-/* Login */
-document.getElementById('loginForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const id = document.getElementById('loginId');
-  const pass = document.getElementById('loginPass');
-  const idMsg = document.getElementById('loginIdMsg');
-  const passMsg = document.getElementById('loginPassMsg');
-  hideMsg(idMsg); hideMsg(passMsg);
-  id.classList.remove('has-error');
-  pass.classList.remove('has-error');
-  let ok = true;
-  if (!id.value.trim() || id.value.trim().length < 2) {
-    showMsg(idMsg, 'أدخل اللقب أو رقم العضو أو الإيميل');
-    id.classList.add('has-error'); ok = false;
-  }
-  if (pass.value.length < 6) {
-    showMsg(passMsg, 'كلمة المرور يجب ألا تقل عن 6 أحرف');
-    pass.classList.add('has-error'); ok = false;
-  }
-  if (!ok) return;
-
-  const btn = document.getElementById('loginBtn');
-  btn.classList.add('btn-loading');
-  btn.disabled = true;
-  setTimeout(() => {
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-    showSuccess('تم الدخول بنجاح');
-  }, 1200);
-});
-
-/* Register */
-document.getElementById('registerForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const nick = document.getElementById('regNick');
-  const guild = document.getElementById('regGuild');
-  const email = document.getElementById('regEmail');
-  const pass = document.getElementById('regPass');
-  const confirm = document.getElementById('regConfirm');
-
-  [document.getElementById('regNickMsg'), document.getElementById('regGuildMsg'),
-   document.getElementById('regEmailMsg'), document.getElementById('regPassMsg'),
-   document.getElementById('regConfirmMsg')].forEach(hideMsg);
-  [nick, guild, email, pass, confirm].forEach(i => i.classList.remove('has-error'));
-
-  let ok = true;
-  if (!nick.value.trim() || nick.value.trim().length < 2) {
-    showMsg(document.getElementById('regNickMsg'), 'أدخل لقبك');
-    nick.classList.add('has-error'); ok = false;
-  }
-  if (!guild.value) {
-    showMsg(document.getElementById('regGuildMsg'), 'اختر نقابتك');
-    guild.classList.add('has-error'); ok = false;
-  }
-  if (email.value.trim() && !email.value.includes('@')) {
-    showMsg(document.getElementById('regEmailMsg'), 'البريد غير صحيح (اختياري)');
-    email.classList.add('has-error'); ok = false;
-  }
-  if (pass.value.length < 6) {
-    showMsg(document.getElementById('regPassMsg'), 'كلمة المرور يجب ألا تقل عن 6 أحرف');
-    pass.classList.add('has-error'); ok = false;
-  }
-  if (pass.value !== confirm.value) {
-    showMsg(document.getElementById('regConfirmMsg'), 'كلمتا المرور غير متطابقتين');
-    confirm.classList.add('has-error'); ok = false;
-  }
-  if (!ok) return;
-
-  const btn = document.getElementById('regBtn');
-  btn.classList.add('btn-loading');
-  btn.disabled = true;
-  setTimeout(() => {
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-    showSuccess('تم إنشاء الحساب');
-  }, 1200);
-});
-
-/* Social → complete profile first */
-function startSocial(provider) {
-  // Simulate OAuth success then ask for nick + guild
-  document.getElementById('completeOverlay').classList.add('show');
-  document.getElementById('compNick').value = '';
-  document.getElementById('compGuild').value = '';
-}
-
-document.getElementById('completeForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const nick = document.getElementById('compNick');
-  const guild = document.getElementById('compGuild');
-  hideMsg(document.getElementById('compNickMsg'));
-  hideMsg(document.getElementById('compGuildMsg'));
-  nick.classList.remove('has-error');
-  guild.classList.remove('has-error');
-  let ok = true;
-  if (!nick.value.trim() || nick.value.trim().length < 2) {
-    showMsg(document.getElementById('compNickMsg'), 'أدخل لقبك');
-    nick.classList.add('has-error'); ok = false;
-  }
-  if (!guild.value) {
-    showMsg(document.getElementById('compGuildMsg'), 'اختر نقابتك');
-    guild.classList.add('has-error'); ok = false;
-  }
-  if (!ok) return;
-
-  document.getElementById('completeOverlay').classList.remove('show');
-  showSuccess('تم الدخول بنجاح');
-});
-
-['loginId','loginPass','regNick','regEmail','regPass','regConfirm','compNick'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener('input', () => {
-    el.classList.remove('has-error');
-    const msg = document.getElementById(id + 'Msg');
-    if (msg) hideMsg(msg);
-  });
-});
-document.getElementById('regGuild')?.addEventListener('change', () => {
-  document.getElementById('regGuild').classList.remove('has-error');
-  hideMsg(document.getElementById('regGuildMsg'));
-});
-document.getElementById('compGuild')?.addEventListener('change', () => {
-  document.getElementById('compGuild').classList.remove('has-error');
-  hideMsg(document.getElementById('compGuildMsg'));
-});
-
-/* Cursor */
-if (!isTouch) {
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursor-dot');
+const isFinePointer = window.matchMedia('(pointer: fine)').matches;
+if (isFinePointer) {
   let mx = 0, my = 0, cx = 0, cy = 0;
-  const dot = document.getElementById('cursor-dot');
-  const ring = document.getElementById('cursor-ring');
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-  (function anim() {
-    cx += (mx - cx) * 0.14;
-    cy += (my - cy) * 0.14;
-    if (dot) { dot.style.left = mx + 'px'; dot.style.top = my + 'px'; }
-    if (ring) { ring.style.left = cx + 'px'; ring.style.top = cy + 'px'; }
-    requestAnimationFrame(anim);
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursorDot.style.left = mx + 'px'; cursorDot.style.top = my + 'px';
+  });
+  (function animCursor() {
+    cx += (mx - cx) * .15; cy += (my - cy) * .15;
+    cursor.style.left = cx + 'px'; cursor.style.top = cy + 'px';
+    requestAnimationFrame(animCursor);
   })();
-  document.querySelectorAll('.hover-target').forEach(el => {
-    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+  document.querySelectorAll('a, button, .btn, .theme-dot').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
   });
 }
 
-/* Particles */
-(function () {
-  const canvas = document.getElementById('bg-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let W, H, particles = [];
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
-  addEventListener('resize', resize); resize();
-  const count = reduced ? 0 : (isMobile ? 14 : Math.min(45, Math.floor(innerWidth / 26)));
-  for (let i = 0; i < count; i++) {
-    particles.push({
-      x: Math.random() * W, y: Math.random() * H,
-      r: Math.random() * 1.2 + 0.25,
-      vx: (Math.random() - 0.5) * (isMobile ? 0.1 : 0.2),
-      vy: (Math.random() - 0.5) * (isMobile ? 0.1 : 0.2),
-      alpha: Math.random() * 0.4 + 0.12
-    });
-  }
-  let mX = W / 2, mY = H / 2;
-  if (!isTouch) document.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; });
-  function draw() {
-    if (reduced || count === 0) return;
-    ctx.clearRect(0, 0, W, H);
-    particles.forEach(p => {
-      p.x += p.vx; p.y += p.vy;
-      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
-      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
-      let glow = 0;
-      if (!isMobile) {
-        const dx = mX - p.x, dy = mY - p.y;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        glow = d < 130 ? (1 - d / 130) : 0;
-      }
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r + glow * 1.3, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(0,212,255,${p.alpha + glow * 0.3})`;
-      ctx.fill();
-    });
-    if (!isMobile) {
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const d = Math.sqrt(dx * dx + dy * dy);
-          if (d < 95) {
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(0,212,255,${0.05 * (1 - d / 95)})`;
-            ctx.lineWidth = 0.45;
-            ctx.stroke();
-          }
-        }
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+const PARTICLE_COUNT = window.innerWidth < 768 ? 25 : 45;
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  particles.push({
+    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+    s: Math.random() * 1.8 + .4, sy: Math.random() * .25 + .08,
+    sx: (Math.random() - .5) * .12, o: Math.random() * .35 + .08
+  });
+}
+function drawParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach((p, i) => {
+    p.y -= p.sy; p.x += p.sx;
+    if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(0,212,255,${p.o})`; ctx.fill();
+    for (let j = i + 1; j < particles.length; j++) {
+      const p2 = particles[j];
+      const dx = p.x - p2.x, dy = p.y - p2.y, d = Math.sqrt(dx * dx + dy * dy);
+      if (d < 100) {
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = `rgba(0,212,255,${.05 * (1 - d / 100)})`; ctx.lineWidth = .4; ctx.stroke();
       }
     }
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
+  });
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
 
-/* Loader */
-const loaderBar = document.getElementById('loaderBar');
-const loaderPct = document.getElementById('loaderPct');
-let pct = 0;
-const pctTimer = setInterval(() => {
-  pct += Math.random() * 16;
-  if (pct >= 100) { pct = 100; clearInterval(pctTimer); }
-  loaderBar.style.width = pct + '%';
-  loaderPct.textContent = Math.floor(pct) + '%';
-}, 55);
-window.addEventListener('load', () => {
-  setTimeout(() => document.getElementById('loader').classList.add('done'), 350);
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const height = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('progress-bar').style.width = (scrolled / height * 100) + '%';
+  document.getElementById('header').classList.toggle('scrolled', scrolled > 50);
 });
+setTimeout(() => document.getElementById('header').classList.add('visible'), 250);
+
+const cardWrap = document.getElementById('card-wrapper');
+const card = document.getElementById('bank-card');
+if (cardWrap && isFinePointer) {
+  cardWrap.addEventListener('mousemove', e => {
+    const r = cardWrap.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    card.style.transform = `perspective(1200px) rotateX(${(y - .5) * -14}deg) rotateY(${(x - .5) * 14}deg) rotate(4deg)`;
+  });
+  cardWrap.addEventListener('mouseleave', () => { card.style.transform = 'rotate(4deg)'; card.style.transition = 'transform .6s'; });
+  cardWrap.addEventListener('mouseenter', () => { card.style.transition = 'transform .1s'; });
+}
+
+const counterObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting && e.target.dataset.counter) {
+      const target = parseInt(e.target.dataset.counter);
+      const start = performance.now();
+      function update(now) {
+        const progress = Math.min((now - start) / 2000, 1);
+        e.target.textContent = Math.floor(target * (1 - Math.pow(1 - progress, 4))).toLocaleString('en-US');
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+      counterObs.unobserve(e.target);
+    }
+  });
+}, { threshold: .5 });
+document.querySelectorAll('[data-counter]').forEach(el => counterObs.observe(el));
+
+const ticker = document.getElementById('ticker');
+ticker.innerHTML += ticker.innerHTML;
+
+function toggleFaq(el) {
+  const item = el.parentElement;
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => {
+    i.classList.remove('open');
+    i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+  });
+  if (!isOpen) { item.classList.add('open'); el.setAttribute('aria-expanded', 'true'); }
+}
+document.querySelectorAll('.faq-question').forEach(q => {
+  q.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFaq(q); } });
+});
+
+function toggleMobileMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+
+function showToast(message) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-message').textContent = message;
+  t.classList.add('show');
+  clearTimeout(window.toastTimer);
+  window.toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+document.querySelectorAll('.theme-dot').forEach(dot => {
+  dot.addEventListener('click', () => {
+    const theme = dot.dataset.themeDot;
+    document.body.dataset.theme = theme;
+    document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+    dot.classList.add('active');
+    localStorage.setItem('shiro-theme', theme);
+    showToast('تم تغيير الثيم');
+  });
+});
+const savedTheme = localStorage.getItem('shiro-theme');
+if (savedTheme) {
+  document.body.dataset.theme = savedTheme;
+  document.querySelectorAll('.theme-dot').forEach(d => d.classList.toggle('active', d.dataset.themeDot === savedTheme));
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('live-clock').textContent = now.toISOString().substr(11, 8) + ' UTC';
+  document.getElementById('live-time').textContent = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: .12, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.section-header, .step-card, .feature-card, .stat-box, .dashboard-panel, .faq-item, .cta-box, .security-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(32px)';
+  el.style.transition = 'all .75s cubic-bezier(0.22,1,0.36,1)';
+  revealObs.observe(el);
+});
+const style = document.createElement('style');
+style.textContent = `.visible { opacity: 1 !important; transform: translateY(0) !important; }`;
+document.head.appendChild(style);
 </script>
 </body>
 </html>
