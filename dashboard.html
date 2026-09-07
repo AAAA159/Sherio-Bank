@@ -11,22 +11,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #04070c;
-  --surface: #0a0f18;
-  --surface2: #0e1520;
-  --cyan: #00d4ff;
-  --cyan-dim: rgba(0,212,255,0.12);
-  --gold: #d4af37;
-  --gold-dim: rgba(212,175,55,0.12);
-  --text: #f0f5fa;
-  --muted: #7a8a9e;
-  --border: rgba(0,212,255,0.18);
-  --border2: rgba(255,255,255,0.06);
-  --success: #2ed573;
-  --danger: #ff4757;
-  --warning: #fbbf24;
-  --radius: 16px;
-  --ease: cubic-bezier(0.22,1,0.36,1);
+  --bg: #04070c; --surface: #0a0f18; --surface2: #0e1520;
+  --cyan: #00d4ff; --cyan-dim: rgba(0,212,255,0.12);
+  --gold: #d4af37; --gold-dim: rgba(212,175,55,0.12);
+  --text: #f0f5fa; --muted: #7a8a9e;
+  --border: rgba(0,212,255,0.18); --border2: rgba(255,255,255,0.06);
+  --success: #2ed573; --danger: #ff4757; --warning: #fbbf24;
+  --radius: 16px; --ease: cubic-bezier(0.22,1,0.36,1);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -37,9 +28,7 @@ body {
 a { text-decoration: none; color: inherit; }
 button, input, select, textarea { font: inherit; border: none; outline: none; background: none; }
 ::selection { background: rgba(0,212,255,0.3); }
-
 .wrap { width: min(1100px, calc(100% - 28px)); margin: 0 auto; }
-
 body::before {
   content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background:
@@ -48,7 +37,6 @@ body::before {
   opacity: .65;
 }
 
-/* Topbar */
 .topbar {
   position: sticky; top: 0; z-index: 100;
   background: rgba(4,7,12,.88); backdrop-filter: blur(18px);
@@ -62,7 +50,6 @@ body::before {
   box-shadow: 0 0 14px var(--cyan-dim);
 }
 .brand strong { font: 700 14px 'Space Grotesk'; letter-spacing: .1em; }
-
 .top-actions { display: flex; align-items: center; gap: 8px; }
 .icon-btn {
   width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border2);
@@ -88,8 +75,12 @@ body::before {
 }
 .user-name { font-size: 12px; font-weight: 600; }
 .user-id { font-size: 9px; color: var(--muted); font-family: 'Space Mono', monospace; direction: ltr; }
+.logout-btn {
+  padding: 7px 12px; border-radius: 10px; border: 1px solid var(--border2);
+  font-size: 11px; font-weight: 600; color: var(--muted); cursor: pointer; transition: .25s;
+}
+.logout-btn:hover { border-color: var(--danger); color: var(--danger); }
 
-/* Nav Tabs */
 .nav-tabs {
   display: flex; gap: 4px; overflow-x: auto; padding: 14px 0 6px;
   -webkit-overflow-scrolling: touch; scrollbar-width: none;
@@ -98,24 +89,17 @@ body::before {
 .nav-tab {
   flex-shrink: 0; padding: 9px 16px; border-radius: 100px;
   font-size: 13px; font-weight: 600; color: var(--muted);
-  border: 1px solid transparent; cursor: pointer; transition: .25s;
-  white-space: nowrap;
+  border: 1px solid transparent; cursor: pointer; transition: .25s; white-space: nowrap;
 }
 .nav-tab:hover { color: var(--text); background: rgba(255,255,255,.03); }
-.nav-tab.active {
-  background: var(--cyan-dim); color: var(--cyan);
-  border-color: var(--border);
-}
+.nav-tab.active { background: var(--cyan-dim); color: var(--cyan); border-color: var(--border); }
 
-/* Sections */
 .section { display: none; padding: 8px 0 50px; position: relative; z-index: 2; }
 .section.active { display: block; }
-
 .page-head { margin-bottom: 20px; }
 .page-title { font-size: 20px; font-weight: 800; margin-bottom: 3px; }
 .page-sub { font-size: 12px; color: var(--muted); }
 
-/* Balance */
 .balance-hero {
   background: linear-gradient(145deg, #0e2030, #0a1520);
   border: 1px solid var(--border); border-radius: 20px;
@@ -139,10 +123,7 @@ body::before {
 .balance-meta span { color: var(--muted); display: block; margin-bottom: 1px; }
 .balance-meta b { font-weight: 600; }
 
-/* Actions */
-.actions-row {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 22px;
-}
+.actions-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 22px; }
 .action-btn {
   background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius);
   padding: 14px 8px; text-align: center; cursor: pointer; transition: .3s var(--ease);
@@ -162,7 +143,6 @@ body::before {
 }
 .action-label { font-size: 12px; font-weight: 600; }
 
-/* Daily Reward */
 .daily-banner {
   background: linear-gradient(135deg, rgba(212,175,55,.12), rgba(0,212,255,.08));
   border: 1px solid rgba(212,175,55,.25); border-radius: 16px;
@@ -185,21 +165,15 @@ body::before {
 .btn-daily:hover { transform: translateY(-2px); box-shadow: 0 6px 18px var(--gold-dim); }
 .btn-daily:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
 
-/* Panels */
 .panel {
   background: var(--surface); border: 1px solid var(--border2);
   border-radius: var(--radius); padding: 18px; margin-bottom: 14px;
 }
-.panel-head {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 14px;
-}
+.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .panel-title { font-size: 14px; font-weight: 700; }
 .panel-link { font-size: 11px; color: var(--cyan); cursor: pointer; }
-
 .grid-2 { display: grid; grid-template-columns: 1.35fr 1fr; gap: 14px; }
 
-/* Transactions */
 .tx-item {
   display: flex; align-items: center; justify-content: space-between;
   padding: 11px 8px; border-radius: 11px; transition: .2s;
@@ -218,16 +192,6 @@ body::before {
 .tx-amount.pos { color: var(--success); }
 .tx-amount.neg { color: var(--danger); }
 
-.filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-.filter-btn {
-  padding: 6px 12px; border-radius: 100px; font-size: 11px; font-weight: 600;
-  color: var(--muted); border: 1px solid var(--border2); cursor: pointer; transition: .25s;
-}
-.filter-btn.active, .filter-btn:hover {
-  background: var(--cyan-dim); color: var(--cyan); border-color: var(--border);
-}
-
-/* Member Card */
 .member-card {
   background: linear-gradient(145deg, #122536, #0c1a28);
   border: 1px solid var(--border); border-radius: 14px; padding: 16px;
@@ -244,10 +208,7 @@ body::before {
   font: 500 16px 'Space Grotesk'; letter-spacing: .1em;
   direction: ltr; margin-bottom: 14px; color: #f0f8ff;
 }
-.mc-bottom {
-  display: flex; justify-content: space-between; gap: 8px;
-  font-size: 10px;
-}
+.mc-bottom { display: flex; justify-content: space-between; gap: 8px; font-size: 10px; }
 .mc-bottom > div { flex: 1; }
 .mc-bottom span {
   color: rgba(255,255,255,.4); display: block;
@@ -255,15 +216,6 @@ body::before {
 }
 .mc-bottom b { font-weight: 600; color: rgba(255,255,255,.92); font-size: 12px; }
 
-.mini-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.mini-stat {
-  background: var(--surface2); border: 1px solid var(--border2);
-  border-radius: 12px; padding: 12px; text-align: center;
-}
-.mini-stat-val { font: 700 18px 'Space Grotesk'; color: var(--cyan); display: block; }
-.mini-stat-label { font-size: 10px; color: var(--muted); }
-
-/* Store */
 .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
 .store-item {
   background: var(--surface); border: 1px solid var(--border2); border-radius: 14px;
@@ -281,7 +233,6 @@ body::before {
 }
 .btn-sm:hover { background: linear-gradient(135deg, var(--cyan), #0891b2); color: #000; }
 
-/* Orders */
 .order-card {
   background: var(--surface); border: 1px solid var(--border2); border-radius: 14px;
   padding: 14px 16px; margin-bottom: 10px;
@@ -292,58 +243,9 @@ body::before {
 .order-status.pending { background: rgba(251,191,36,.12); color: var(--warning); }
 .order-status.processing { background: rgba(0,212,255,.12); color: var(--cyan); }
 .order-status.done { background: rgba(46,213,115,.12); color: var(--success); }
-.order-status.rejected { background: rgba(255,71,87,.12); color: var(--danger); }
 .order-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
 .order-meta { font-size: 11px; color: var(--muted); }
 
-/* Leaderboard */
-.lb-row {
-  display: grid; grid-template-columns: 44px 1fr 70px;
-  align-items: center; padding: 11px 8px; border-radius: 11px;
-  border-bottom: 1px solid var(--border2);
-}
-.lb-row:last-child { border-bottom: none; }
-.lb-rank { font: 700 15px 'Space Grotesk'; }
-.lb-rank.r1 { color: #ffd700; }
-.lb-rank.r2 { color: #c0c0c0; }
-.lb-rank.r3 { color: #cd7f32; }
-.lb-name { font-size: 13px; font-weight: 600; }
-.lb-group { font-size: 10px; color: var(--muted); }
-.lb-pts { font: 600 13px 'Space Grotesk'; color: var(--success); direction: ltr; text-align: left; }
-
-/* Notifications */
-.notif-item {
-  display: flex; gap: 12px; padding: 12px 8px;
-  border-bottom: 1px solid var(--border2); transition: .2s;
-}
-.notif-item:last-child { border-bottom: none; }
-.notif-item:hover { background: rgba(255,255,255,.02); }
-.notif-item.unread { background: rgba(0,212,255,.04); }
-.notif-dot {
-  width: 8px; height: 8px; border-radius: 50%; background: var(--cyan);
-  margin-top: 6px; flex-shrink: 0;
-}
-.notif-item:not(.unread) .notif-dot { background: transparent; }
-.notif-body { flex: 1; }
-.notif-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-.notif-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
-.notif-time { font-size: 10px; color: var(--muted); margin-top: 4px; }
-
-/* Settings */
-.setting-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 0; border-bottom: 1px solid var(--border2); gap: 12px; flex-wrap: wrap;
-}
-.setting-row:last-child { border-bottom: none; }
-.setting-label { font-size: 13px; font-weight: 600; }
-.setting-desc { font-size: 11px; color: var(--muted); }
-.setting-input {
-  background: rgba(255,255,255,.03); border: 1px solid var(--border2);
-  border-radius: 10px; padding: 9px 12px; color: var(--text); font-size: 13px; width: 160px;
-}
-.setting-input:focus { border-color: var(--cyan); }
-
-/* Modal */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 200;
   background: rgba(0,0,0,.7); backdrop-filter: blur(8px);
@@ -365,149 +267,116 @@ body::before {
   color: var(--muted); display: grid; place-items: center; cursor: pointer; transition: .25s;
 }
 .modal-close:hover { border-color: var(--danger); color: var(--danger); }
-
 .form-group { margin-bottom: 12px; }
-.form-label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight: 500; }
-.form-input, .form-textarea, .form-select {
+.form-label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+.form-input, .form-textarea {
   width: 100%; background: rgba(255,255,255,.03); border: 1px solid var(--border2);
-  border-radius: 11px; padding: 11px 13px; color: var(--text); font-size: 13px; transition: .25s;
+  border-radius: 10px; padding: 11px 12px; color: var(--text); font-size: 13px;
 }
-.form-input:focus, .form-textarea:focus, .form-select:focus {
-  border-color: var(--cyan); box-shadow: 0 0 0 3px var(--cyan-dim);
-}
-.form-textarea { min-height: 80px; resize: vertical; }
-.form-select { appearance: auto; }
-
+.form-input:focus, .form-textarea:focus { border-color: var(--cyan); }
+.form-textarea { min-height: 70px; resize: vertical; }
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-  padding: 12px 18px; border-radius: 11px; font-weight: 700; font-size: 13px;
-  cursor: pointer; transition: .3s var(--ease); width: 100%;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 13px;
+  cursor: pointer; transition: .25s; margin-top: 6px;
 }
-.btn-primary {
-  background: linear-gradient(135deg, var(--cyan), #0891b2); color: #000;
-  box-shadow: 0 5px 16px var(--cyan-dim);
-}
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,212,255,.35); }
-.btn-ghost {
-  background: transparent; border: 1px solid var(--border2); color: var(--muted); margin-top: 7px;
-}
+.btn-primary { background: linear-gradient(135deg, var(--cyan), #0891b2); color: #000; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px var(--cyan-dim); }
+.btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--muted); }
 .btn-ghost:hover { border-color: var(--border); color: var(--text); }
 
-/* Toast */
 .toast {
-  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(70px);
-  background: #0f1724; border: 1px solid var(--border); border-radius: 12px;
-  padding: 11px 18px; font-size: 12px; display: flex; align-items: center; gap: 9px;
-  z-index: 300; opacity: 0; transition: .4s var(--ease);
-  box-shadow: 0 10px 32px rgba(0,0,0,.4); max-width: 90%;
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 12px;
+  padding: 12px 18px; display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 600; z-index: 300;
+  opacity: 0; transition: .35s var(--ease); pointer-events: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,.4);
 }
-.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-.toast-icon {
-  width: 20px; height: 20px; border-radius: 50%; background: var(--success);
-  color: #000; display: grid; place-items: center; font-size: 11px; font-weight: 700; flex-shrink: 0;
-}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast-icon { color: var(--success); }
 
-.track-result {
-  background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px;
-  padding: 14px; margin-top: 12px; display: none;
+.loading-screen {
+  position: fixed; inset: 0; z-index: 500; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
 }
-.track-result.show { display: block; }
-.track-status-line { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.loading-screen.hide { display: none; }
+.loading-text { font-size: 13px; color: var(--muted); }
 
-/* Responsive */
-@media (max-width: 800px) {
+@media (max-width: 700px) {
+  .actions-row { grid-template-columns: repeat(2, 1fr); }
   .grid-2 { grid-template-columns: 1fr; }
-  .actions-row { grid-template-columns: repeat(4, 1fr); }
   .balance-amount { font-size: 34px; }
-  .store-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 480px) {
-  .wrap { width: calc(100% - 20px); }
-  .actions-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .action-btn { padding: 12px 6px; }
-  .balance-hero { padding: 18px 14px; }
-  .balance-amount { font-size: 28px; }
-  .user-name, .user-id { display: none; }
-  .store-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .daily-banner { flex-direction: column; align-items: flex-start; }
-  .mc-bottom { flex-wrap: wrap; gap: 10px; }
-  .mc-bottom > div { min-width: 40%; }
 }
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
-<header class="topbar">
+<div class="loading-screen" id="loadingScreen">
+  <div style="font:700 18px 'Space Grotesk';color:var(--cyan);letter-spacing:.2em">SHIRO</div>
+  <div class="loading-text">جاري تحميل حسابك...</div>
+</div>
+
+<div class="topbar">
   <div class="wrap topbar-inner">
-    <a href="#" class="brand"><div class="crest">城</div><strong>SHIRO BANK</strong></a>
+    <div class="brand">
+      <div class="crest">城</div>
+      <strong>SHIRO BANK</strong>
+    </div>
     <div class="top-actions">
       <button class="icon-btn" onclick="switchSection('notifications')" title="الإشعارات">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-        <span class="badge" id="notifBadge">3</span>
+        🔔<span class="badge" id="notifBadge" style="display:none">0</span>
       </button>
       <div class="user-chip">
-        <div class="user-avatar">أ</div>
+        <div class="user-avatar" id="userAvatar">—</div>
         <div>
-          <div class="user-name">أحمد محمد</div>
-          <div class="user-id">SHR-2048</div>
+          <div class="user-name" id="userName">...</div>
+          <div class="user-id" id="userMemberId">—</div>
         </div>
       </div>
-      <button class="icon-btn" onclick="location.href='login.html'" title="خروج">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-      </button>
+      <button class="logout-btn" id="logoutBtn">خروج</button>
     </div>
   </div>
-</header>
+</div>
 
-<!-- NAV -->
 <div class="wrap">
   <div class="nav-tabs">
     <button class="nav-tab active" data-section="home">الرئيسية</button>
     <button class="nav-tab" data-section="store">متجر المملكة</button>
     <button class="nav-tab" data-section="orders">طلباتي</button>
     <button class="nav-tab" data-section="history">السجل</button>
-    <button class="nav-tab" data-section="leaderboard">الترتيب</button>
-    <button class="nav-tab" data-section="notifications">الإشعارات</button>
     <button class="nav-tab" data-section="settings">الإعدادات</button>
-    <button class="nav-tab" data-section="support">المساعدة</button>
   </div>
-</div>
 
-<!-- ==================== HOME ==================== -->
-<section class="section active" id="sec-home">
-  <div class="wrap">
-    <div class="page-head">
-      <h1 class="page-title">محفظة المملكة</h1>
-      <p class="page-sub">إدارة نقاطك وطلباتك داخل بنك Shiro</p>
-    </div>
-
+  <!-- HOME -->
+  <section class="section active" id="sec-home">
     <div class="balance-hero">
-      <div class="balance-label"><span class="dot"></span> الرصيد الحالي</div>
-      <div class="balance-amount" id="balanceDisplay">12,480</div>
+      <div class="balance-label"><span class="dot"></span> رصيد نقاط المملكة</div>
+      <div class="balance-amount" id="balanceDisplay">0</div>
       <div class="balance-meta">
-        <div><span>المعرّف</span><b style="direction:ltr">SHR-2048</b></div>
-        <div><span>الحالة</span><b style="color:var(--success)">● نشط</b></div>
-        <div><span>آخر تحديث</span><b id="lastUpdate">الآن</b></div>
+        <div><span>رقم العضو</span><b id="metaMemberId">—</b></div>
+        <div><span>النقابة</span><b id="metaGuild">—</b></div>
+        <div><span>الرتبة</span><b id="metaRank">—</b></div>
+        <div><span>الحالة</span><b id="metaStatus" style="color:var(--success)">نشط</b></div>
       </div>
     </div>
 
-    <div class="daily-banner" id="dailyBanner">
+    <div class="actions-row">
+      <button class="action-btn" onclick="openModal('transfer')"><div class="action-icon">↗</div><span class="action-label">تحويل</span></button>
+      <button class="action-btn" onclick="openModal('request')"><div class="action-icon">📩</div><span class="action-label">طلب نقاط</span></button>
+      <button class="action-btn" onclick="switchSection('store')"><div class="action-icon">🏪</div><span class="action-label">المتجر</span></button>
+      <button class="action-btn" onclick="openModal('track')"><div class="action-icon">🔍</div><span class="action-label">تتبع</span></button>
+    </div>
+
+    <div class="daily-banner">
       <div class="daily-info">
         <div class="daily-icon">🎁</div>
         <div class="daily-text">
           <b>المكافأة اليومية</b>
-          <span id="dailyStatus">متاحة الآن — احصل على 50 نقطة</span>
+          <span id="dailyStatus">احصل على 50 نقطة كل يوم</span>
         </div>
       </div>
-      <button class="btn-daily" id="dailyBtn" onclick="claimDaily()">احصل عليها</button>
-    </div>
-
-    <div class="actions-row">
-      <button class="action-btn" onclick="openModal('transfer')"><div class="action-icon">⇄</div><span class="action-label">تحويل</span></button>
-      <button class="action-btn" onclick="openModal('request')"><div class="action-icon">📥</div><span class="action-label">طلب نقاط</span></button>
-      <button class="action-btn" onclick="openModal('search')"><div class="action-icon">🔍</div><span class="action-label">بحث</span></button>
-      <button class="action-btn" onclick="openModal('track')"><div class="action-icon">📦</div><span class="action-label">تتبع طلب</span></button>
+      <button class="btn-daily" id="dailyBtn" onclick="claimDaily()">استلام</button>
     </div>
 
     <div class="grid-2">
@@ -519,182 +388,96 @@ body::before {
         <div id="homeTxList"></div>
       </div>
       <div>
-        <!-- البطاقة -->
         <div class="member-card">
           <div class="mc-top">
             <div class="mc-chip"></div>
             <div class="mc-logo">SHIRO BANK</div>
           </div>
-          <div class="mc-number">SHR • 0000 • 2048</div>
+          <div class="mc-number" id="cardNumber">SHR •••• 0000</div>
           <div class="mc-bottom">
-            <div>
-              <span>النقابة</span>
-              <b id="cardGuild">VIOD</b>
-            </div>
-            <div style="text-align:center">
-              <span>الرتبة</span>
-              <b id="cardRank" style="color:var(--gold)">سفير</b>
-            </div>
-            <div style="text-align:left">
-              <span>Holder</span>
-              <b id="cardHolder">AHMED M.</b>
-            </div>
+            <div><span>HOLDER</span><b id="cardHolder">—</b></div>
+            <div><span>GUILD</span><b id="cardGuild">—</b></div>
+            <div><span>RANK</span><b id="cardRank">—</b></div>
           </div>
         </div>
-
-        <div class="mini-stats">
-          <div class="mini-stat"><span class="mini-stat-val">24</span><span class="mini-stat-label">عملية الشهر</span></div>
-          <div class="mini-stat"><span class="mini-stat-val">#12</span><span class="mini-stat-label">ترتيبك</span></div>
-          <div class="mini-stat"><span class="mini-stat-val">3</span><span class="mini-stat-label">طلبات نشطة</span></div>
-          <div class="mini-stat"><span class="mini-stat-val">Gold</span><span class="mini-stat-label">رتبتك</span></div>
-        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ==================== STORE ==================== -->
-<section class="section" id="sec-store">
-  <div class="wrap">
+  <!-- STORE -->
+  <section class="section" id="sec-store">
     <div class="page-head">
-      <h1 class="page-title">متجر المملكة</h1>
-      <p class="page-sub">استبدل نقاطك بمزايا وخدمات رسمية من المملكة</p>
+      <div class="page-title">متجر المملكة</div>
+      <div class="page-sub">استبدل نقاطك بمزايا داخل المملكة</div>
     </div>
     <div class="store-grid" id="storeGrid"></div>
-  </div>
-</section>
+  </section>
 
-<!-- ==================== ORDERS ==================== -->
-<section class="section" id="sec-orders">
-  <div class="wrap">
+  <!-- ORDERS -->
+  <section class="section" id="sec-orders">
     <div class="page-head">
-      <h1 class="page-title">طلباتي</h1>
-      <p class="page-sub">كل طلب له رقم تتبع خاص — تابع حالته من هنا</p>
+      <div class="page-title">طلباتي</div>
+      <div class="page-sub">تتبع حالة طلباتك</div>
     </div>
     <div id="ordersList"></div>
-  </div>
-</section>
+  </section>
 
-<!-- ==================== HISTORY ==================== -->
-<section class="section" id="sec-history">
-  <div class="wrap">
+  <!-- HISTORY -->
+  <section class="section" id="sec-history">
     <div class="page-head">
-      <h1 class="page-title">سجل العمليات</h1>
-      <p class="page-sub">كل حركة على رصيدك</p>
+      <div class="page-title">سجل العمليات</div>
+      <div class="page-sub">كل حركات النقاط</div>
     </div>
-    <div class="filters">
-      <button class="filter-btn active" data-filter="all">الكل</button>
-      <button class="filter-btn" data-filter="in">وارد</button>
-      <button class="filter-btn" data-filter="out">صادر</button>
-      <button class="filter-btn" data-filter="reward">مكافآت</button>
-      <button class="filter-btn" data-filter="store">متجر</button>
+    <div class="panel" id="fullTxList"></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="section" id="sec-settings">
+    <div class="page-head">
+      <div class="page-title">الإعدادات</div>
+      <div class="page-sub">بيانات حسابك</div>
     </div>
     <div class="panel">
-      <div id="fullTxList"></div>
+      <div class="form-group">
+        <label class="form-label">اللقب</label>
+        <input class="form-input" id="setName" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label">النقابة</label>
+        <input class="form-input" id="setGuild" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الرتبة</label>
+        <input class="form-input" id="setRank" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label">رقم العضو</label>
+        <input class="form-input" id="setMemberId" readonly style="direction:ltr">
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px">لتغيير النقابة أو الرتبة تواصل مع إدارة البنك.</p>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ==================== LEADERBOARD ==================== -->
-<section class="section" id="sec-leaderboard">
-  <div class="wrap">
+  <!-- NOTIFICATIONS -->
+  <section class="section" id="sec-notifications">
     <div class="page-head">
-      <h1 class="page-title">لوحة الترتيب</h1>
-      <p class="page-sub">أفضل الأعضاء هذا الأسبوع</p>
+      <div class="page-title">الإشعارات</div>
+      <div class="page-sub">آخر التحديثات</div>
     </div>
-    <div class="panel" id="leaderboardList"></div>
-  </div>
-</section>
+    <div class="panel" id="notifList">
+      <div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">لا توجد إشعارات حالياً</div>
+    </div>
+  </section>
+</div>
 
-<!-- ==================== NOTIFICATIONS ==================== -->
-<section class="section" id="sec-notifications">
-  <div class="wrap">
-    <div class="page-head">
-      <h1 class="page-title">الإشعارات</h1>
-      <p class="page-sub">آخر التحديثات على حسابك</p>
-    </div>
-    <div class="panel" id="notifList"></div>
-  </div>
-</section>
-
-<!-- ==================== SETTINGS ==================== -->
-<section class="section" id="sec-settings">
-  <div class="wrap">
-    <div class="page-head">
-      <h1 class="page-title">الإعدادات</h1>
-      <p class="page-sub">إدارة بيانات حسابك</p>
-    </div>
-    <div class="panel">
-      <div class="setting-row">
-        <div><div class="setting-label">الاسم الظاهر</div><div class="setting-desc">يظهر للأعضاء الآخرين</div></div>
-        <input class="setting-input" id="setName" value="أحمد محمد">
-      </div>
-      <div class="setting-row">
-        <div><div class="setting-label">النقابة</div><div class="setting-desc">اسم نقابتك</div></div>
-        <input class="setting-input" id="setGuild" value="VIOD">
-      </div>
-      <div class="setting-row">
-        <div><div class="setting-label">الرتبة</div><div class="setting-desc">رتبتك داخل المملكة</div></div>
-        <input class="setting-input" id="setRank" value="سفير">
-      </div>
-      <div class="setting-row">
-        <div><div class="setting-label">البريد الإلكتروني</div><div class="setting-desc">للتواصل والإشعارات</div></div>
-        <input class="setting-input" id="setEmail" value="ahmed@example.com" type="email">
-      </div>
-      <div class="setting-row">
-        <div><div class="setting-label">كلمة المرور</div><div class="setting-desc">آخر تغيير منذ 30 يوم</div></div>
-        <button class="btn-sm" style="width:auto" onclick="showToast('سيتم إضافة تغيير كلمة المرور مع Firebase')">تغيير</button>
-      </div>
-      <div style="margin-top:16px">
-        <button class="btn btn-primary" onclick="saveSettings()">حفظ التعديلات</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ==================== SUPPORT ==================== -->
-<section class="section" id="sec-support">
-  <div class="wrap">
-    <div class="page-head">
-      <h1 class="page-title">المساعدة والدعم</h1>
-      <p class="page-sub">تواصل مع إدارة المملكة</p>
-    </div>
-    <div class="panel">
-      <form onsubmit="handleSupport(event)">
-        <div class="form-group">
-          <label class="form-label">نوع المشكلة</label>
-          <select class="form-select" id="supportType" required>
-            <option value="">— اختر —</option>
-            <option value="transfer">مشكلة في تحويل</option>
-            <option value="order">مشكلة في طلب</option>
-            <option value="points">نقاط مفقودة</option>
-            <option value="other">أخرى</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">رقم الطلب (إن وجد)</label>
-          <input class="form-input" id="supportOrderId" placeholder="ORD-XXXXXX">
-        </div>
-        <div class="form-group">
-          <label class="form-label">التفاصيل</label>
-          <textarea class="form-textarea" id="supportMsg" placeholder="اكتب تفاصيل المشكلة..." required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">إرسال التذكرة</button>
-      </form>
-    </div>
-  </div>
-</section>
-
-<!-- ========== MODALS ========== -->
-
+<!-- Modals -->
 <div class="modal-overlay" id="modal-transfer">
   <div class="modal">
     <div class="modal-header"><div class="modal-title">تحويل نقاط</div><button class="modal-close" onclick="closeModal('transfer')">✕</button></div>
     <form onsubmit="handleTransfer(event)">
-      <div class="form-group"><label class="form-label">إلى (معرّف أو اسم)</label><input class="form-input" id="transferTo" placeholder="SHR-1024 أو سارة" required></div>
-      <div class="form-group"><label class="form-label">المبلغ</label><input class="form-input" type="number" id="transferAmount" min="1" placeholder="0" required></div>
-      <div class="form-group"><label class="form-label">ملاحظة</label><input class="form-input" id="transferNote" placeholder="اختياري"></div>
-      <button type="submit" class="btn btn-primary">تأكيد التحويل</button>
+      <div class="form-group"><label class="form-label">إلى (رقم العضو أو الإيميل)</label><input class="form-input" id="transferTo" required></div>
+      <div class="form-group"><label class="form-label">المبلغ</label><input class="form-input" type="number" id="transferAmount" min="1" required></div>
+      <button type="submit" class="btn btn-primary">تحويل</button>
       <button type="button" class="btn btn-ghost" onclick="closeModal('transfer')">إلغاء</button>
     </form>
   </div>
@@ -704,20 +487,11 @@ body::before {
   <div class="modal">
     <div class="modal-header"><div class="modal-title">طلب نقاط</div><button class="modal-close" onclick="closeModal('request')">✕</button></div>
     <form onsubmit="handleRequestPoints(event)">
-      <div class="form-group"><label class="form-label">من العضو</label><input class="form-input" id="reqFrom" placeholder="معرّف أو اسم" required></div>
       <div class="form-group"><label class="form-label">المبلغ</label><input class="form-input" type="number" id="reqAmount" min="1" required></div>
       <div class="form-group"><label class="form-label">السبب</label><input class="form-input" id="reqReason" required></div>
       <button type="submit" class="btn btn-primary">إرسال الطلب</button>
       <button type="button" class="btn btn-ghost" onclick="closeModal('request')">إلغاء</button>
     </form>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-search">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title">بحث عن عضو</div><button class="modal-close" onclick="closeModal('search')">✕</button></div>
-    <div class="form-group"><input class="form-input" id="searchInput" placeholder="اسم أو معرّف..." oninput="handleSearch(this.value)"></div>
-    <div id="searchResults" style="max-height:200px;overflow-y:auto"></div>
   </div>
 </div>
 
@@ -729,7 +503,7 @@ body::before {
       <input class="form-input" id="trackId" placeholder="ORD-XXXXXX" style="direction:ltr;text-align:left">
     </div>
     <button class="btn btn-primary" onclick="trackOrder()">تتبع</button>
-    <div class="track-result" id="trackResult"></div>
+    <div id="trackResult" style="margin-top:12px;font-size:13px"></div>
   </div>
 </div>
 
@@ -738,156 +512,296 @@ body::before {
     <div class="modal-header"><div class="modal-title" id="buyTitle">تأكيد الطلب</div><button class="modal-close" onclick="closeModal('buy')">✕</button></div>
     <p style="font-size:13px;color:var(--muted);margin-bottom:14px" id="buyDesc"></p>
     <div class="form-group">
-      <label class="form-label">ملاحظات إضافية (اختياري)</label>
-      <textarea class="form-textarea" id="buyNote" placeholder="مثال: أريد الزيارة يوم الجمعة..."></textarea>
+      <label class="form-label">ملاحظات (اختياري)</label>
+      <textarea class="form-textarea" id="buyNote"></textarea>
     </div>
-    <button class="btn btn-primary" id="buyConfirmBtn" onclick="confirmBuy()">تأكيد الطلب</button>
+    <button class="btn btn-primary" onclick="confirmBuy()">تأكيد الطلب</button>
     <button type="button" class="btn btn-ghost" onclick="closeModal('buy')">إلغاء</button>
   </div>
 </div>
 
 <div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toastMsg"></span></div>
 
-<script>
-let balance = 12480;
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, updateDoc, collection, addDoc,
+  query, where, orderBy, limit, getDocs, serverTimestamp, increment
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA_h9yvBeuxRsySYDYZ1MubzHrqKZfsnOs",
+  authDomain: "shiro-bank.firebaseapp.com",
+  projectId: "shiro-bank",
+  storageBucket: "shiro-bank.firebasestorage.app",
+  messagingSenderId: "1082352937803",
+  appId: "1:1082352937803:web:7e5ceee4e7deef63ead6ce",
+  measurementId: "G-9XS3VLN6NR"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let memberData = null;
+let balance = 0;
 let dailyClaimed = false;
 let currentBuyItem = null;
+let transactions = [];
+let orders = [];
 
 const storeItems = [
-  { id: 'visit', emoji: '🏰', name: 'زيارة المملكة', desc: 'طلب زيارة رسمية للمملكة', price: 500 },
-  { id: 'vip', emoji: '👑', name: 'رتبة VIP', desc: 'رتبة مميزة لمدة 30 يوم', price: 1200 },
-  { id: 'role', emoji: '🎭', name: 'رول مخصص', desc: 'رول باسمك أو لون خاص', price: 800 },
-  { id: 'badge', emoji: '🏅', name: 'شارة حصرية', desc: 'شارة تظهر بجانب اسمك', price: 450 },
-  { id: 'event', emoji: '🎉', name: 'فعالية خاصة', desc: 'طلب تنظيم فعالية صغيرة', price: 2000 },
-  { id: 'custom', emoji: '✨', name: 'ميزة مخصصة', desc: 'اطلب ميزة تناسبك', price: 1500 },
+  { id: 'visit', emoji: '🏰', name: 'زيارة المملكة', desc: 'طلب زيارة رسمية', price: 500 },
+  { id: 'vip', emoji: '👑', name: 'رتبة VIP', desc: 'رتبة مميزة 30 يوم', price: 1200 },
+  { id: 'role', emoji: '🎭', name: 'رول مخصص', desc: 'رول باسمك', price: 800 },
+  { id: 'badge', emoji: '🏅', name: 'شارة حصرية', desc: 'شارة بجانب اسمك', price: 450 },
+  { id: 'event', emoji: '🎉', name: 'فعالية خاصة', desc: 'طلب فعالية صغيرة', price: 2000 },
+  { id: 'custom', emoji: '✨', name: 'ميزة مخصصة', desc: 'ميزة حسب طلبك', price: 1500 },
 ];
 
-let orders = [
-  { id: 'ORD-839201', title: 'زيارة المملكة', status: 'processing', date: 'منذ 3 ساعات', note: 'زيارة يوم الجمعة' },
-  { id: 'ORD-772104', title: 'رتبة VIP', status: 'done', date: 'منذ يومين', note: '' },
-  { id: 'ORD-661033', title: 'شارة حصرية', status: 'pending', date: 'منذ 5 ساعات', note: '' },
-];
+/* ========== Auth ========== */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    location.href = 'login.html';
+    return;
+  }
+  currentUser = user;
+  try {
+    await loadMember(user.uid);
+    document.getElementById('loadingScreen').classList.add('hide');
+  } catch (err) {
+    console.error(err);
+    showToast('خطأ في تحميل البيانات');
+    document.getElementById('loadingScreen').classList.add('hide');
+  }
+});
 
-let transactions = [
-  { name: 'مكافأة فعالية', amount: 850, type: 'reward', date: 'اليوم · 14:32' },
-  { name: 'استبدال رتبة VIP', amount: -1200, type: 'store', date: 'أمس · 21:10' },
-  { name: 'تحويل من سارة', amount: 300, type: 'in', date: 'أمس · 18:45' },
-  { name: 'تحويل إلى محمد', amount: -150, type: 'out', date: 'منذ يومين' },
-  { name: 'مكافأة يومية', amount: 50, type: 'reward', date: 'منذ 3 أيام' },
-  { name: 'شراء شارة', amount: -450, type: 'store', date: 'منذ 4 أيام' },
-];
+async function loadMember(uid) {
+  const snap = await getDoc(doc(db, 'members', uid));
+  if (!snap.exists()) {
+    showToast('لم يتم العثور على بيانات العضو');
+    return;
+  }
+  memberData = snap.data();
+  balance = memberData.balance || 0;
 
-const members = [
-  { id: 'SHR-1024', name: 'سارة أحمد', avatar: 'س' },
-  { id: 'SHR-3091', name: 'محمد علي', avatar: 'م' },
-  { id: 'SHR-4412', name: 'نور حسن', avatar: 'ن' },
-  { id: 'SHR-5570', name: 'علي كريم', avatar: 'ع' },
-  { id: 'SHR-6823', name: 'ليان سمير', avatar: 'ل' },
-];
+  // UI
+  document.getElementById('balanceDisplay').textContent = balance.toLocaleString('en-US');
+  document.getElementById('userName').textContent = memberData.nickname || 'عضو';
+  document.getElementById('userMemberId').textContent = memberData.memberId || '—';
+  document.getElementById('userAvatar').textContent = (memberData.nickname || '؟')[0];
+  document.getElementById('metaMemberId').textContent = memberData.memberId || '—';
+  document.getElementById('metaGuild').textContent = memberData.guild || '—';
+  document.getElementById('metaRank').textContent = memberData.rank || 'عضو';
+  document.getElementById('cardNumber').textContent = (memberData.memberId || 'SHR-0000').replace('-', ' •••• ');
+  document.getElementById('cardHolder').textContent = (memberData.nickname || '—').toUpperCase();
+  document.getElementById('cardGuild').textContent = memberData.guild || '—';
+  document.getElementById('cardRank').textContent = memberData.rank || 'عضو';
+  document.getElementById('setName').value = memberData.nickname || '';
+  document.getElementById('setGuild').value = memberData.guild || '';
+  document.getElementById('setRank').value = memberData.rank || '';
+  document.getElementById('setMemberId').value = memberData.memberId || '';
 
-const leaderboard = [
-  { rank: 1, name: 'أحمد', group: 'VIOD', pts: 12450 },
-  { rank: 2, name: 'سارة', group: 'VIOD', pts: 11280 },
-  { rank: 3, name: 'محمد', group: 'VIOD', pts: 9840 },
-  { rank: 4, name: 'نور', group: 'VIOD', pts: 8920 },
-  { rank: 5, name: 'علي', group: 'VIOD', pts: 7650 },
-];
+  if (memberData.status === 'frozen') {
+    document.getElementById('metaStatus').textContent = 'مجمّد';
+    document.getElementById('metaStatus').style.color = 'var(--warning)';
+  } else if (memberData.status === 'closed') {
+    document.getElementById('metaStatus').textContent = 'مغلق';
+    document.getElementById('metaStatus').style.color = 'var(--danger)';
+  }
 
-const notifications = [
-  { title: 'طلبك قيد المعالجة', text: 'طلب زيارة المملكة (ORD-839201) قيد المراجعة من الإدارة.', time: 'منذ ساعة', unread: true },
-  { title: 'تحويل وارد', text: 'استلمت 300 نقطة من سارة أحمد.', time: 'أمس', unread: true },
-  { title: 'تم قبول طلبك', text: 'تم تفعيل رتبة VIP بنجاح.', time: 'منذ يومين', unread: true },
-  { title: 'مكافأة جديدة', text: 'حصلت على 850 نقطة من فعالية المملكة.', time: 'منذ 3 أيام', unread: false },
-];
+  // Daily reward check
+  const today = new Date().toDateString();
+  if (memberData.lastDaily === today) {
+    dailyClaimed = true;
+    document.getElementById('dailyBtn').disabled = true;
+    document.getElementById('dailyBtn').textContent = 'تم الاستلام';
+    document.getElementById('dailyStatus').textContent = 'تم استلام المكافأة اليوم';
+  }
 
-function showToast(msg) {
+  await loadTransactions(uid);
+  await loadOrders(uid);
+  renderStore();
+}
+
+async function loadTransactions(uid) {
+  try {
+    const q = query(
+      collection(db, 'transactions'),
+      where('uid', '==', uid),
+      orderBy('createdAt', 'desc'),
+      limit(20)
+    );
+    const snap = await getDocs(q);
+    transactions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    // لو مفيش index أو فاضي
+    transactions = [];
+  }
+  renderHomeTx();
+  renderFullTx();
+}
+
+async function loadOrders(uid) {
+  try {
+    const q = query(
+      collection(db, 'orders'),
+      where('uid', '==', uid),
+      orderBy('createdAt', 'desc'),
+      limit(20)
+    );
+    const snap = await getDocs(q);
+    orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    orders = [];
+  }
+  renderOrders();
+}
+
+async function saveBalance(newBalance, txName, amount) {
+  balance = newBalance;
+  document.getElementById('balanceDisplay').textContent = balance.toLocaleString('en-US');
+  await updateDoc(doc(db, 'members', currentUser.uid), {
+    balance: newBalance,
+    updatedAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'transactions'), {
+    uid: currentUser.uid,
+    name: txName,
+    amount: amount,
+    createdAt: serverTimestamp()
+  });
+  transactions.unshift({ name: txName, amount, createdAt: new Date() });
+  renderHomeTx();
+  renderFullTx();
+}
+
+/* ========== UI helpers ========== */
+window.showToast = function(msg) {
   document.getElementById('toastMsg').textContent = msg;
   const t = document.getElementById('toast');
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
-}
-function updateBalance() {
-  document.getElementById('balanceDisplay').textContent = balance.toLocaleString('en-US');
-  document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-}
-function genOrderId() {
-  return 'ORD-' + Math.floor(100000 + Math.random() * 900000);
-}
-function statusLabel(s) {
-  return { pending: 'قيد الانتظار', processing: 'قيد المعالجة', done: 'مكتمل', rejected: 'مرفوض' }[s] || s;
-}
-
-function switchSection(id) {
+};
+window.switchSection = function(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.section === id));
-  document.getElementById('sec-' + id).classList.add('active');
-  if (id === 'notifications') document.getElementById('notifBadge').style.display = 'none';
-}
+  const sec = document.getElementById('sec-' + id);
+  if (sec) sec.classList.add('active');
+};
 document.querySelectorAll('.nav-tab').forEach(tab => {
   tab.addEventListener('click', () => switchSection(tab.dataset.section));
 });
-
-function openModal(id) { document.getElementById('modal-' + id).classList.add('open'); }
-function closeModal(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+window.openModal = function(id) { document.getElementById('modal-' + id).classList.add('open'); };
+window.closeModal = function(id) { document.getElementById('modal-' + id).classList.remove('open'); };
 document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
 
-function claimDaily() {
-  if (dailyClaimed) return;
-  balance += 50;
-  dailyClaimed = true;
-  updateBalance();
-  transactions.unshift({ name: 'مكافأة يومية', amount: 50, type: 'reward', date: 'الآن' });
-  document.getElementById('dailyBtn').disabled = true;
-  document.getElementById('dailyBtn').textContent = 'تم الاستلام';
-  document.getElementById('dailyStatus').textContent = 'تم استلام المكافأة اليوم — عد غدًا';
-  renderHomeTx();
-  showToast('حصلت على 50 نقطة ✓');
+function formatDate(ts) {
+  if (!ts) return 'الآن';
+  if (ts.toDate) return ts.toDate().toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
+  return new Date(ts).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
 }
 
-function handleTransfer(e) {
+function renderHomeTx() {
+  const list = transactions.slice(0, 5);
+  document.getElementById('homeTxList').innerHTML = list.length ? list.map(tx => `
+    <div class="tx-item">
+      <div class="tx-left">
+        <div class="tx-icon ${tx.amount > 0 ? 'in' : 'out'}">${tx.amount > 0 ? '↓' : '↑'}</div>
+        <div><div class="tx-name">${tx.name}</div><div class="tx-date">${formatDate(tx.createdAt)}</div></div>
+      </div>
+      <div class="tx-amount ${tx.amount > 0 ? 'pos' : 'neg'}">${tx.amount > 0 ? '+' : ''}${Number(tx.amount).toLocaleString()}</div>
+    </div>
+  `).join('') : '<div style="text-align:center;color:var(--muted);padding:16px;font-size:12px">لا توجد عمليات بعد</div>';
+}
+function renderFullTx() {
+  document.getElementById('fullTxList').innerHTML = transactions.length ? transactions.map(tx => `
+    <div class="tx-item">
+      <div class="tx-left">
+        <div class="tx-icon ${tx.amount > 0 ? 'in' : 'out'}">${tx.amount > 0 ? '↓' : '↑'}</div>
+        <div><div class="tx-name">${tx.name}</div><div class="tx-date">${formatDate(tx.createdAt)}</div></div>
+      </div>
+      <div class="tx-amount ${tx.amount > 0 ? 'pos' : 'neg'}">${tx.amount > 0 ? '+' : ''}${Number(tx.amount).toLocaleString()}</div>
+    </div>
+  `).join('') : '<div style="text-align:center;color:var(--muted);padding:20px">لا توجد عمليات</div>';
+}
+
+window.claimDaily = async function() {
+  if (dailyClaimed || !currentUser) return;
+  try {
+    const today = new Date().toDateString();
+    await updateDoc(doc(db, 'members', currentUser.uid), {
+      balance: increment(50),
+      lastDaily: today,
+      updatedAt: serverTimestamp()
+    });
+    await addDoc(collection(db, 'transactions'), {
+      uid: currentUser.uid,
+      name: 'مكافأة يومية',
+      amount: 50,
+      createdAt: serverTimestamp()
+    });
+    balance += 50;
+    dailyClaimed = true;
+    document.getElementById('balanceDisplay').textContent = balance.toLocaleString('en-US');
+    document.getElementById('dailyBtn').disabled = true;
+    document.getElementById('dailyBtn').textContent = 'تم الاستلام';
+    document.getElementById('dailyStatus').textContent = 'تم استلام المكافأة اليوم';
+    transactions.unshift({ name: 'مكافأة يومية', amount: 50, createdAt: new Date() });
+    renderHomeTx(); renderFullTx();
+    showToast('حصلت على 50 نقطة ✓');
+  } catch (e) {
+    showToast('حدث خطأ، حاول مرة أخرى');
+  }
+};
+
+window.handleTransfer = async function(e) {
   e.preventDefault();
   const to = document.getElementById('transferTo').value.trim();
   const amount = parseInt(document.getElementById('transferAmount').value);
   if (amount > balance) { showToast('الرصيد غير كافٍ'); return; }
-  balance -= amount;
-  updateBalance();
-  transactions.unshift({ name: 'تحويل إلى ' + to, amount: -amount, type: 'out', date: 'الآن' });
-  renderHomeTx(); renderFullTx();
-  closeModal('transfer'); e.target.reset();
-  showToast('تم التحويل بنجاح');
-}
+  if (amount < 1) return;
+  try {
+    await saveBalance(balance - amount, 'تحويل إلى ' + to, -amount);
+    closeModal('transfer');
+    e.target.reset();
+    showToast('تم التحويل (محلي) — الربط الكامل بين الأعضاء قريبًا');
+  } catch (err) {
+    showToast('فشل التحويل');
+  }
+};
 
-function handleRequestPoints(e) {
+window.handleRequestPoints = async function(e) {
   e.preventDefault();
-  const id = genOrderId();
-  orders.unshift({
-    id, title: 'طلب نقاط من ' + document.getElementById('reqFrom').value,
-    status: 'pending', date: 'الآن', note: document.getElementById('reqReason').value
-  });
-  renderOrders();
-  closeModal('request'); e.target.reset();
-  showToast('تم إرسال الطلب · ' + id);
-}
-
-function handleSearch(q) {
-  const box = document.getElementById('searchResults');
-  if (!q) { box.innerHTML = ''; return; }
-  const res = members.filter(m => m.name.includes(q) || m.id.toLowerCase().includes(q.toLowerCase()));
-  box.innerHTML = res.length ? res.map(m => `
-    <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer"
-         onmouseover="this.style.background='var(--cyan-dim)'" onmouseout="this.style.background='transparent'"
-         onclick="selectMember('${m.id}','${m.name}')">
-      <div style="width:32px;height:32px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--cyan)">${m.avatar}</div>
-      <div><div style="font-size:13px;font-weight:600">${m.name}</div><div style="font-size:10px;color:var(--muted);direction:ltr">${m.id}</div></div>
-    </div>
-  `).join('') : '<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px">لا توجد نتائج</div>';
-}
-function selectMember(id, name) {
-  closeModal('search'); openModal('transfer');
-  document.getElementById('transferTo').value = id + ' — ' + name;
-}
+  const amount = parseInt(document.getElementById('reqAmount').value);
+  const reason = document.getElementById('reqReason').value.trim();
+  const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+  try {
+    await addDoc(collection(db, 'orders'), {
+      uid: currentUser.uid,
+      orderId,
+      title: 'طلب نقاط: ' + amount,
+      type: 'points_request',
+      amount,
+      note: reason,
+      status: 'pending',
+      nickname: memberData.nickname,
+      createdAt: serverTimestamp()
+    });
+    orders.unshift({ orderId, title: 'طلب نقاط: ' + amount, status: 'pending', note: reason, createdAt: new Date() });
+    renderOrders();
+    closeModal('request');
+    e.target.reset();
+    showToast('تم إرسال الطلب · ' + orderId);
+    switchSection('orders');
+  } catch (err) {
+    showToast('فشل إرسال الطلب');
+  }
+};
 
 function renderStore() {
   document.getElementById('storeGrid').innerHTML = storeItems.map(item => `
@@ -900,30 +814,56 @@ function renderStore() {
     </div>
   `).join('');
 }
-function openBuy(id) {
+window.openBuy = function(id) {
   currentBuyItem = storeItems.find(i => i.id === id);
   document.getElementById('buyTitle').textContent = currentBuyItem.name;
-  document.getElementById('buyDesc').textContent = currentBuyItem.desc + ' · السعر: ' + currentBuyItem.price.toLocaleString() + ' نقطة';
+  document.getElementById('buyDesc').textContent = currentBuyItem.desc + ' · ' + currentBuyItem.price.toLocaleString() + ' نقطة';
   document.getElementById('buyNote').value = '';
   openModal('buy');
-}
-function confirmBuy() {
+};
+window.confirmBuy = async function() {
   if (!currentBuyItem) return;
   if (currentBuyItem.price > balance) { showToast('الرصيد غير كافٍ'); return; }
-  balance -= currentBuyItem.price;
-  updateBalance();
-  const orderId = genOrderId();
-  orders.unshift({
-    id: orderId, title: currentBuyItem.name, status: 'pending', date: 'الآن',
-    note: document.getElementById('buyNote').value || ''
-  });
-  transactions.unshift({ name: 'طلب: ' + currentBuyItem.name, amount: -currentBuyItem.price, type: 'store', date: 'الآن' });
-  renderOrders(); renderHomeTx(); renderFullTx();
-  closeModal('buy');
-  showToast('تم إنشاء الطلب · ' + orderId);
-  switchSection('orders');
-}
+  const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+  const note = document.getElementById('buyNote').value.trim();
+  try {
+    await updateDoc(doc(db, 'members', currentUser.uid), {
+      balance: increment(-currentBuyItem.price),
+      updatedAt: serverTimestamp()
+    });
+    await addDoc(collection(db, 'transactions'), {
+      uid: currentUser.uid,
+      name: 'طلب: ' + currentBuyItem.name,
+      amount: -currentBuyItem.price,
+      createdAt: serverTimestamp()
+    });
+    await addDoc(collection(db, 'orders'), {
+      uid: currentUser.uid,
+      orderId,
+      title: currentBuyItem.name,
+      type: currentBuyItem.id,
+      amount: currentBuyItem.price,
+      note,
+      status: 'pending',
+      nickname: memberData.nickname,
+      createdAt: serverTimestamp()
+    });
+    balance -= currentBuyItem.price;
+    document.getElementById('balanceDisplay').textContent = balance.toLocaleString('en-US');
+    transactions.unshift({ name: 'طلب: ' + currentBuyItem.name, amount: -currentBuyItem.price, createdAt: new Date() });
+    orders.unshift({ orderId, title: currentBuyItem.name, status: 'pending', note, createdAt: new Date() });
+    renderHomeTx(); renderFullTx(); renderOrders();
+    closeModal('buy');
+    showToast('تم إنشاء الطلب · ' + orderId);
+    switchSection('orders');
+  } catch (e) {
+    showToast('فشل الطلب');
+  }
+};
 
+function statusLabel(s) {
+  return { pending: 'قيد الانتظار', processing: 'قيد المعالجة', done: 'مكتمل', rejected: 'مرفوض' }[s] || s;
+}
 function renderOrders() {
   const list = document.getElementById('ordersList');
   if (!orders.length) {
@@ -933,117 +873,34 @@ function renderOrders() {
   list.innerHTML = orders.map(o => `
     <div class="order-card">
       <div class="order-top">
-        <div class="order-id">${o.id}</div>
+        <div class="order-id">${o.orderId || o.id}</div>
         <span class="order-status ${o.status}">${statusLabel(o.status)}</span>
       </div>
       <div class="order-title">${o.title}</div>
-      <div class="order-meta">${o.date}${o.note ? ' · ' + o.note : ''}</div>
+      <div class="order-meta">${formatDate(o.createdAt)}${o.note ? ' · ' + o.note : ''}</div>
     </div>
   `).join('');
 }
 
-function trackOrder() {
+window.trackOrder = function() {
   const id = document.getElementById('trackId').value.trim().toUpperCase();
   const box = document.getElementById('trackResult');
-  const order = orders.find(o => o.id === id);
+  const order = orders.find(o => (o.orderId || '').toUpperCase() === id);
   if (!order) {
-    box.innerHTML = '<div style="color:var(--danger);font-size:13px">لم يتم العثور على طلب بهذا الرقم</div>';
-    box.classList.add('show');
+    box.innerHTML = '<div style="color:var(--danger)">لم يتم العثور على الطلب</div>';
     return;
   }
   box.innerHTML = `
-    <div class="track-status-line">
-      <span class="order-status ${order.status}">${statusLabel(order.status)}</span>
-      <strong style="font-size:13px">${order.title}</strong>
-    </div>
-    <div style="font-size:12px;color:var(--muted)">رقم التتبع: <span style="direction:ltr;color:var(--cyan)">${order.id}</span></div>
-    <div style="font-size:12px;color:var(--muted);margin-top:4px">${order.date}${order.note ? ' · ' + order.note : ''}</div>
+    <div style="margin-bottom:6px"><span class="order-status ${order.status}">${statusLabel(order.status)}</span></div>
+    <div style="font-weight:600">${order.title}</div>
+    <div style="color:var(--muted);font-size:12px;margin-top:4px">${formatDate(order.createdAt)}</div>
   `;
-  box.classList.add('show');
-}
+};
 
-function renderHomeTx() {
-  document.getElementById('homeTxList').innerHTML = transactions.slice(0, 5).map(tx => `
-    <div class="tx-item">
-      <div class="tx-left">
-        <div class="tx-icon ${tx.amount > 0 ? 'in' : 'out'}">${tx.amount > 0 ? '↓' : '↑'}</div>
-        <div><div class="tx-name">${tx.name}</div><div class="tx-date">${tx.date}</div></div>
-      </div>
-      <div class="tx-amount ${tx.amount > 0 ? 'pos' : 'neg'}">${tx.amount > 0 ? '+' : ''}${tx.amount.toLocaleString()}</div>
-    </div>
-  `).join('');
-}
-function renderFullTx(filter = 'all') {
-  let list = transactions;
-  if (filter === 'in') list = transactions.filter(t => t.amount > 0);
-  else if (filter === 'out') list = transactions.filter(t => t.amount < 0 && t.type !== 'store' && t.type !== 'reward');
-  else if (filter !== 'all') list = transactions.filter(t => t.type === filter);
-  document.getElementById('fullTxList').innerHTML = list.map(tx => `
-    <div class="tx-item">
-      <div class="tx-left">
-        <div class="tx-icon ${tx.amount > 0 ? 'in' : 'out'}">${tx.amount > 0 ? '↓' : '↑'}</div>
-        <div><div class="tx-name">${tx.name}</div><div class="tx-date">${tx.date}</div></div>
-      </div>
-      <div class="tx-amount ${tx.amount > 0 ? 'pos' : 'neg'}">${tx.amount > 0 ? '+' : ''}${tx.amount.toLocaleString()}</div>
-    </div>
-  `).join('') || '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">لا توجد عمليات</div>';
-}
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderFullTx(btn.dataset.filter);
-  });
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await signOut(auth);
+  location.href = 'login.html';
 });
-
-function renderLeaderboard() {
-  document.getElementById('leaderboardList').innerHTML = leaderboard.map(r => `
-    <div class="lb-row">
-      <div class="lb-rank ${r.rank <= 3 ? 'r' + r.rank : ''}">${r.rank <= 3 ? ['🥇','🥈','🥉'][r.rank-1] : r.rank}</div>
-      <div><div class="lb-name">${r.name}</div><div class="lb-group">${r.group}</div></div>
-      <div class="lb-pts">+${r.pts.toLocaleString()}</div>
-    </div>
-  `).join('');
-}
-
-function renderNotifs() {
-  document.getElementById('notifList').innerHTML = notifications.map(n => `
-    <div class="notif-item ${n.unread ? 'unread' : ''}">
-      <div class="notif-dot"></div>
-      <div class="notif-body">
-        <div class="notif-title">${n.title}</div>
-        <div class="notif-text">${n.text}</div>
-        <div class="notif-time">${n.time}</div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function saveSettings() {
-  const guild = document.getElementById('setGuild').value.trim() || 'VIOD';
-  const rank = document.getElementById('setRank').value.trim() || 'سفير';
-  const name = document.getElementById('setName').value.trim() || 'أحمد محمد';
-  document.getElementById('cardGuild').textContent = guild;
-  document.getElementById('cardRank').textContent = rank;
-  document.getElementById('cardHolder').textContent = name.split(' ')[0].toUpperCase() + (name.split(' ')[1] ? ' ' + name.split(' ')[1][0].toUpperCase() + '.' : '');
-  document.querySelector('.user-name').textContent = name;
-  showToast('تم حفظ الإعدادات');
-}
-
-function handleSupport(e) {
-  e.preventDefault();
-  const ticketId = 'TKT-' + Math.floor(10000 + Math.random() * 90000);
-  e.target.reset();
-  showToast('تم إرسال التذكرة · ' + ticketId);
-}
-
-updateBalance();
-renderStore();
-renderOrders();
-renderHomeTx();
-renderFullTx();
-renderLeaderboard();
-renderNotifs();
 </script>
 </body>
 </html>
