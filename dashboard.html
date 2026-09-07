@@ -475,9 +475,13 @@ body::before {
   <div class="modal">
     <div class="modal-header"><div class="modal-title">تحويل نقاط</div><button class="modal-close" onclick="closeModal('transfer')">✕</button></div>
     <form onsubmit="handleTransfer(event)">
-      <div class="form-group"><label class="form-label">إلى (رقم العضو أو الإيميل)</label><input class="form-input" id="transferTo" required></div>
+      <div class="form-group">
+        <label class="form-label">إلى (رقم العضو أو الإيميل)</label>
+        <input class="form-input" id="transferTo" required autocomplete="off" onblur="previewMember('transfer')">
+      </div>
+      <div id="transferMemberPreview" style="display:none;background:var(--cyan-dim);border:1px solid var(--border);border-radius:10px;padding:10px;margin:-3px 0 12px;font-size:12px"></div>
       <div class="form-group"><label class="form-label">المبلغ</label><input class="form-input" type="number" id="transferAmount" min="1" required></div>
-      <button type="submit" class="btn btn-primary">تحويل</button>
+      <button type="submit" class="btn btn-primary">تحويل بعد التأكيد</button>
       <button type="button" class="btn btn-ghost" onclick="closeModal('transfer')">إلغاء</button>
     </form>
   </div>
@@ -487,9 +491,14 @@ body::before {
   <div class="modal">
     <div class="modal-header"><div class="modal-title">طلب نقاط</div><button class="modal-close" onclick="closeModal('request')">✕</button></div>
     <form onsubmit="handleRequestPoints(event)">
+      <div class="form-group">
+        <label class="form-label">اطلب من (رقم العضو أو الإيميل)</label>
+        <input class="form-input" id="requestFrom" required autocomplete="off" onblur="previewMember('request')">
+      </div>
+      <div id="requestMemberPreview" style="display:none;background:var(--cyan-dim);border:1px solid var(--border);border-radius:10px;padding:10px;margin:-3px 0 12px;font-size:12px"></div>
       <div class="form-group"><label class="form-label">المبلغ</label><input class="form-input" type="number" id="reqAmount" min="1" required></div>
       <div class="form-group"><label class="form-label">السبب</label><input class="form-input" id="reqReason" required></div>
-      <button type="submit" class="btn btn-primary">إرسال الطلب</button>
+      <button type="submit" class="btn btn-primary">إرسال الطلب بعد التأكيد</button>
       <button type="button" class="btn btn-ghost" onclick="closeModal('request')">إلغاء</button>
     </form>
   </div>
@@ -527,7 +536,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/fireba
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, updateDoc, collection, addDoc,
-  query, where, orderBy, limit, getDocs, serverTimestamp, increment
+  query, where, orderBy, limit, getDocs, serverTimestamp, increment, writeBatch
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -628,22 +637,23 @@ async function loadMember(uid) {
 
 async function loadTransactions(uid) {
   try {
-    const q = query(
-      collection(db, 'transactions'),
-      where('uid', '==', uid),
-      orderBy('createdAt', 'desc'),
-      limit(20)
-    );
+    const q = query(collection(db, 'transactions'), where('uid', '==', uid), orderBy('createdAt', 'desc'), limit(20));
     const snap = await getDocs(q);
     transactions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (e) {
-    // لو مفيش index أو فاضي
-    transactions = [];
+    console.error('فشل تحميل سجل العمليات:', e.code, e.message);
+    try {
+      const q = query(collection(db, 'transactions'), where('uid', '==', uid), limit(20));
+      const snap = await getDocs(q);
+      transactions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (fallbackError) {
+      console.error('فشل التحميل البديل:', fallbackError.code, fallbackError.message);
+      transactions = [];
+    }
   }
   renderHomeTx();
   renderFullTx();
 }
-
 async function loadOrders(uid) {
   try {
     const q = query(
@@ -661,23 +671,68 @@ async function loadOrders(uid) {
 }
 
 async function saveBalance(newBalance, txName, amount) {
+  const memberRef = doc(db, 'members', currentUser.uid);
+  const txRef = doc(collection(db, 'transactions'));
+  const batch = writeBatch(db);
+  batch.update(memberRef, { balance: newBalance, updatedAt: serverTimestamp() });
+  batch.set(txRef, { uid: currentUser.uid, name: txName, amount: Number(amount), createdAt: serverTimestamp() });
+  await batch.commit();
   balance = newBalance;
   document.getElementById('balanceDisplay').textContent = balance.toLocaleString('en-US');
-  await updateDoc(doc(db, 'members', currentUser.uid), {
-    balance: newBalance,
-    updatedAt: serverTimestamp()
-  });
-  await addDoc(collection(db, 'transactions'), {
-    uid: currentUser.uid,
-    name: txName,
-    amount: amount,
-    createdAt: serverTimestamp()
-  });
-  transactions.unshift({ name: txName, amount, createdAt: new Date() });
+  transactions.unshift({ id: txRef.id, name: txName, amount: Number(amount), createdAt: new Date() });
   renderHomeTx();
   renderFullTx();
 }
 
+// البحث يكون بواسطة memberId أو email فقط، ولا نعرض أي بيانات حساسة.
+async function findMember(identifier) {
+  const rawValue = identifier.trim();
+  const values = { memberId: rawValue, email: rawValue.toLowerCase() };
+  if (!rawValue) return null;
+  for (const field of ['memberId', 'email']) {
+    const q = query(collection(db, 'members'), where(field, '==', values[field]), limit(1));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      const d = snap.docs[0];
+      return { uid: d.id, ...d.data() };
+    }
+  }
+  return null;
+}
+
+let selectedTransferMember = null;
+let selectedRequestMember = null;
+
+window.previewMember = async function(type) {
+  const inputId = type === 'transfer' ? 'transferTo' : 'requestFrom';
+  const boxId = type === 'transfer' ? 'transferMemberPreview' : 'requestMemberPreview';
+  const box = document.getElementById(boxId);
+  const value = document.getElementById(inputId).value;
+  box.style.display = 'block';
+  box.textContent = 'جاري البحث عن العضو...';
+  try {
+    const member = await findMember(value);
+    if (!member || member.uid === currentUser.uid) {
+      if (type === 'transfer') selectedTransferMember = null;
+      else selectedRequestMember = null;
+      box.style.color = 'var(--danger)';
+      box.textContent = member?.uid === currentUser.uid ? 'لا يمكن اختيار حسابك أنت.' : 'لم يتم العثور على عضو بهذا الرقم أو البريد.';
+      return;
+    }
+    if (type === 'transfer') selectedTransferMember = member;
+    else selectedRequestMember = member;
+    box.style.color = 'var(--text)';
+    box.innerHTML = `<b>سيتم التعامل مع:</b> ${escapeHtml(member.nickname || 'عضو')}<br><span style="color:var(--muted)">${escapeHtml(member.memberId || '')}${member.guild ? ' · ' + escapeHtml(member.guild) : ''}${member.rank ? ' · ' + escapeHtml(member.rank) : ''}</span>`;
+  } catch (e) {
+    console.error('فشل البحث عن العضو:', e.code, e.message);
+    box.style.color = 'var(--danger)';
+    box.textContent = 'تعذر البحث. تحقق من الاتصال والصلاحيات.';
+  }
+};
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+}
 /* ========== UI helpers ========== */
 window.showToast = function(msg) {
   document.getElementById('toastMsg').textContent = msg;
@@ -761,48 +816,66 @@ window.claimDaily = async function() {
 
 window.handleTransfer = async function(e) {
   e.preventDefault();
-  const to = document.getElementById('transferTo').value.trim();
-  const amount = parseInt(document.getElementById('transferAmount').value);
+  const amount = parseInt(document.getElementById('transferAmount').value, 10);
+  if (!selectedTransferMember) {
+    await previewMember('transfer');
+    if (!selectedTransferMember) return;
+  }
+  if (!Number.isInteger(amount) || amount < 1) return;
   if (amount > balance) { showToast('الرصيد غير كافٍ'); return; }
-  if (amount < 1) return;
   try {
-    await saveBalance(balance - amount, 'تحويل إلى ' + to, -amount);
-    closeModal('transfer');
-    e.target.reset();
-    showToast('تم التحويل (محلي) — الربط الكامل بين الأعضاء قريبًا');
+    const senderRef = doc(db, 'members', currentUser.uid);
+    const receiverRef = doc(db, 'members', selectedTransferMember.uid);
+    const senderTx = doc(collection(db, 'transactions'));
+    const receiverTx = doc(collection(db, 'transactions'));
+    const batch = writeBatch(db);
+    batch.update(senderRef, { balance: increment(-amount), updatedAt: serverTimestamp() });
+    batch.update(receiverRef, { balance: increment(amount), updatedAt: serverTimestamp() });
+    batch.set(senderTx, { uid: currentUser.uid, name: 'تحويل إلى ' + (selectedTransferMember.nickname || selectedTransferMember.memberId), amount: -amount, relatedUid: selectedTransferMember.uid, createdAt: serverTimestamp() });
+    batch.set(receiverTx, { uid: selectedTransferMember.uid, name: 'تحويل من ' + (memberData.nickname || memberData.memberId), amount: amount, relatedUid: currentUser.uid, createdAt: serverTimestamp() });
+    await batch.commit();
+    balance -= amount;
+    document.getElementById('balanceDisplay').textContent = balance.toLocaleString('en-US');
+    transactions.unshift({ id: senderTx.id, name: 'تحويل إلى ' + (selectedTransferMember.nickname || selectedTransferMember.memberId), amount: -amount, createdAt: new Date() });
+    renderHomeTx(); renderFullTx();
+    closeModal('transfer'); e.target.reset(); selectedTransferMember = null;
+    document.getElementById('transferMemberPreview').style.display = 'none';
+    showToast('تم التحويل بنجاح');
   } catch (err) {
-    showToast('فشل التحويل');
+    console.error('فشل التحويل:', err.code, err.message);
+    showToast('فشل التحويل: تحقق من صلاحيات Firestore');
   }
 };
-
 window.handleRequestPoints = async function(e) {
   e.preventDefault();
-  const amount = parseInt(document.getElementById('reqAmount').value);
+  const amount = parseInt(document.getElementById('reqAmount').value, 10);
   const reason = document.getElementById('reqReason').value.trim();
+  if (!selectedRequestMember) {
+    await previewMember('request');
+    if (!selectedRequestMember) return;
+  }
+  if (!Number.isInteger(amount) || amount < 1 || !reason) return;
   const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
   try {
     await addDoc(collection(db, 'orders'), {
       uid: currentUser.uid,
+      fromUid: selectedRequestMember.uid,
+      fromMemberId: selectedRequestMember.memberId || null,
+      fromNickname: selectedRequestMember.nickname || null,
       orderId,
-      title: 'طلب نقاط: ' + amount,
-      type: 'points_request',
-      amount,
-      note: reason,
-      status: 'pending',
-      nickname: memberData.nickname,
-      createdAt: serverTimestamp()
+      title: 'طلب نقاط من ' + (selectedRequestMember.nickname || selectedRequestMember.memberId),
+      type: 'points_request', amount, note: reason, status: 'pending',
+      nickname: memberData.nickname, createdAt: serverTimestamp()
     });
-    orders.unshift({ orderId, title: 'طلب نقاط: ' + amount, status: 'pending', note: reason, createdAt: new Date() });
-    renderOrders();
-    closeModal('request');
-    e.target.reset();
-    showToast('تم إرسال الطلب · ' + orderId);
-    switchSection('orders');
+    orders.unshift({ orderId, title: 'طلب نقاط من ' + (selectedRequestMember.nickname || selectedRequestMember.memberId), status: 'pending', note: reason, createdAt: new Date() });
+    renderOrders(); closeModal('request'); e.target.reset(); selectedRequestMember = null;
+    document.getElementById('requestMemberPreview').style.display = 'none';
+    showToast('تم إرسال الطلب · ' + orderId); switchSection('orders');
   } catch (err) {
+    console.error('فشل إرسال طلب النقاط:', err.code, err.message);
     showToast('فشل إرسال الطلب');
   }
 };
-
 function renderStore() {
   document.getElementById('storeGrid').innerHTML = storeItems.map(item => `
     <div class="store-item">
