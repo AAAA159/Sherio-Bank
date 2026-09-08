@@ -2,597 +2,299 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Shiro Bank — دخول البنك</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shiro Bank — لوحة الأدمن</title>
 <meta name="theme-color" content="#00d4ff">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='none' stroke='%23d4af37' stroke-width='3'/%3E%3Ctext x='50' y='62' text-anchor='middle' font-size='42' fill='%2300d4ff'%3E城%3C/text%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #04070c;
-  --surface: #0a0f18;
-  --cyan: #00d4ff;
-  --cyan-dim: rgba(0,212,255,0.15);
-  --gold: #d4af37;
-  --gold-dim: rgba(212,175,55,0.15);
-  --text: #f0f5fa;
-  --muted: #7a8a9e;
-  --border: rgba(0,212,255,0.22);
-  --border2: rgba(255,255,255,0.07);
-  --success: #2ed573;
-  --error: #ff4757;
-  --ease: cubic-bezier(0.16,1,0.3,1);
-  --ease-out: cubic-bezier(0.22,1,0.36,1);
+  --bg:#04070c; --surface:#0a0f18; --surface2:#0e1520;
+  --cyan:#00d4ff; --cyan-dim:rgba(0,212,255,.12);
+  --gold:#d4af37; --gold-dim:rgba(212,175,55,.12);
+  --text:#f0f5fa; --muted:#7a8a9e;
+  --border:rgba(0,212,255,.18); --border2:rgba(255,255,255,.06);
+  --success:#2ed573; --danger:#ff4757; --warning:#fbbf24;
+  --radius:14px; --ease:cubic-bezier(.22,1,.36,1);
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { height: 100%; }
-body {
-  background: var(--bg); color: var(--text);
-  font-family: Cairo, 'Segoe UI', sans-serif;
-  min-height: 100%; overflow-x: hidden;
-  display: flex; flex-direction: column;
-  -webkit-font-smoothing: antialiased;
-}
-a { text-decoration: none; color: inherit; }
-button, input, select { font-family: inherit; border: none; background: none; color: inherit; }
-::selection { background: rgba(0,212,255,0.35); color: #fff; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Cairo,sans-serif;min-height:100vh;line-height:1.6}
+button,input,select,textarea{font:inherit;border:none;outline:none;background:none;color:inherit}
+.wrap{width:min(1120px,calc(100% - 28px));margin:0 auto}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 50% 30% at 90% 0%,var(--cyan-dim),transparent),
+             radial-gradient(ellipse 40% 25% at 5% 100%,var(--gold-dim),transparent);opacity:.55}
 
-@media (hover: hover) and (pointer: fine) {
-  body { cursor: none; }
-  button, input, a, select { cursor: none; }
-  #cursor-dot {
-    width: 6px; height: 6px; background: var(--cyan);
-    border-radius: 50%; position: fixed; top: 0; left: 0;
-    pointer-events: none; z-index: 9999;
-    transform: translate(-50%,-50%); mix-blend-mode: screen;
-  }
-  #cursor-ring {
-    width: 36px; height: 36px;
-    border: 1.5px solid rgba(0,212,255,0.5);
-    border-radius: 50%; position: fixed; top: 0; left: 0;
-    pointer-events: none; z-index: 9998;
-    transform: translate(-50%,-50%);
-    transition: width .3s var(--ease), height .3s var(--ease), border-color .3s, background .3s;
-  }
-  body.cursor-hover #cursor-ring {
-    width: 58px; height: 58px;
-    border-color: var(--gold);
-    background: rgba(212,175,55,0.08);
-  }
-  body.cursor-hover #cursor-dot { transform: translate(-50%,-50%) scale(0); }
-}
-@media (hover: none), (pointer: coarse) {
-  #cursor-dot, #cursor-ring { display: none !important; }
-}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(4,7,12,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border2);padding:11px 0}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;direction:ltr}
+.crest{width:34px;height:34px;border:1.5px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--cyan);font-size:15px;box-shadow:0 0 14px var(--cyan-dim)}
+.brand strong{font:700 14px 'Space Grotesk';letter-spacing:.1em}
+.brand small{display:block;font:10px 'Space Mono';color:var(--gold);letter-spacing:.08em}
+.badge-admin{background:linear-gradient(135deg,var(--gold),#b8942a);color:#000;font-size:10px;font-weight:800;padding:4px 12px;border-radius:100px}
 
-#bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.5; }
-#noise {
-  position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-.grid-overlay {
-  position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  background-image:
-    linear-gradient(rgba(0,212,255,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,212,255,0.035) 1px, transparent 1px);
-  background-size: 52px 52px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 10%, transparent 70%);
-}
-.vignette {
-  position: fixed; inset: 0; z-index: 2; pointer-events: none;
-  background: radial-gradient(ellipse 75% 65% at 50% 45%, transparent 30%, rgba(0,0,0,0.55) 100%);
-}
-.orb { position: absolute; border-radius: 50%; pointer-events: none; z-index: 2; filter: blur(90px); }
-.orb-1 { width: 480px; height: 480px; background: var(--cyan-dim); top: -160px; right: -100px; animation: float1 22s ease-in-out infinite; }
-.orb-2 { width: 320px; height: 320px; background: var(--gold-dim); bottom: -80px; left: -80px; animation: float2 26s ease-in-out infinite; }
-.orb-3 { width: 180px; height: 180px; background: rgba(0,212,255,0.08); top: 40%; left: 50%; transform: translateX(-50%); animation: float3 16s ease-in-out infinite; }
-@keyframes float1 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(-35px,45px)} 66%{transform:translate(25px,-25px)} }
-@keyframes float2 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(40px,-30px)} 66%{transform:translate(-25px,40px)} }
-@keyframes float3 { 0%,100%{transform:translateX(-50%) scale(1);opacity:.5} 50%{transform:translateX(-50%) scale(1.15);opacity:.85} }
+.nav-tabs{display:flex;gap:4px;overflow-x:auto;padding:12px 0 6px;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{flex-shrink:0;padding:8px 14px;border-radius:100px;font-size:12px;font-weight:600;color:var(--muted);border:1px solid transparent;cursor:pointer;transition:.25s;white-space:nowrap}
+.nav-tab:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.nav-tab.active{background:var(--cyan-dim);color:var(--cyan);border-color:var(--border)}
+.nav-tab .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--danger);margin-right:4px;vertical-align:middle}
 
-@media (prefers-reduced-motion: reduce) {
-  .orb, .loader-logo, .status-dot { animation: none !important; }
-  .login-card { animation: none !important; opacity: 1; transform: none; filter: none; }
-  * { transition-duration: 0.01ms !important; }
-}
+.section{display:none;padding:8px 0 50px;position:relative;z-index:2}
+.section.active{display:block}
+.page-title{font-size:20px;font-weight:800;margin-bottom:3px}
+.page-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
 
-#loader {
-  position: fixed; inset: 0; z-index: 10000;
-  background: var(--bg);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 1.6rem; transition: opacity .8s var(--ease), visibility .8s;
-}
-#loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
-.loader-logo {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.1rem; font-weight: 700; letter-spacing: .35em;
-  color: var(--cyan); text-shadow: 0 0 28px var(--cyan-dim);
-  animation: logoPulse 2s ease-in-out infinite;
-}
-@keyframes logoPulse { 0%,100%{opacity:.75} 50%{opacity:1} }
-.loader-bar-wrap { width: 160px; height: 2px; background: rgba(0,212,255,0.15); border-radius: 2px; overflow: hidden; }
-.loader-bar {
-  height: 100%; width: 0;
-  background: linear-gradient(90deg, var(--cyan), var(--gold));
-  transition: width 1.2s var(--ease);
-}
-.loader-pct {
-  font-family: 'Space Mono', monospace;
-  font-size: .6rem; letter-spacing: .2em; color: var(--muted);
-}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;text-align:center}
+.stat-val{font:700 22px 'Space Grotesk';color:var(--cyan);display:block}
+.stat-label{font-size:11px;color:var(--muted)}
 
-.wrap {
-  position: relative; z-index: 10; flex: 1;
-  display: flex; flex-direction: column; min-height: 100svh;
-}
-header {
-  position: relative; z-index: 90;
-  padding: 1.15rem 1.25rem;
-  display: flex; align-items: center; justify-content: space-between;
-  max-width: 1100px; margin: 0 auto; width: 100%;
-  opacity: 0; animation: fadeDown .8s var(--ease) .2s forwards;
-}
-@keyframes fadeDown { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:none} }
-.logo { display: flex; align-items: center; gap: 11px; font-weight: 700; transition: opacity .3s; }
-.logo:hover { opacity: .85; }
-.crest {
-  width: 36px; height: 36px; border: 1.5px solid var(--gold); border-radius: 50%;
-  display: grid; place-items: center; color: var(--cyan); font-size: 18px;
-  box-shadow: 0 0 20px var(--cyan-dim); flex-shrink: 0;
-}
-.logo-name { display: flex; flex-direction: column; line-height: 1.1; direction: ltr; }
-.logo-name span:first-child {
-  font-family: 'Space Grotesk', sans-serif; font-size: .92rem; font-weight: 700; letter-spacing: .14em;
-}
-.logo-name span:last-child {
-  font-family: 'Space Mono', monospace; font-size: .48rem; color: var(--cyan); letter-spacing: .22em;
-}
-.back-home {
-  font-size: .72rem; font-weight: 600; color: var(--muted);
-  display: flex; align-items: center; gap: 6px;
-  padding: 8px 14px; border-radius: 10px; border: 1px solid transparent; transition: all .25s;
-}
-.back-home:hover { color: var(--cyan); border-color: var(--border); background: var(--cyan-dim); }
+.panel{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.panel-title{font-size:14px;font-weight:700;margin-bottom:12px}
 
-.login-section {
-  flex: 1; display: flex; align-items: center; justify-content: center;
-  padding: 1rem 1rem 2.5rem;
-}
-.login-card {
-  width: 100%; max-width: 420px;
-  background: linear-gradient(165deg, rgba(12,20,32,0.96) 0%, rgba(6,12,20,0.98) 100%);
-  border: 1px solid var(--border); border-radius: 24px;
-  padding: 2rem 1.75rem 1.85rem; backdrop-filter: blur(24px);
-  position: relative; overflow: hidden;
-  box-shadow: 0 24px 64px -16px rgba(0,0,0,.7), 0 0 80px -28px rgba(0,212,255,.18);
-  opacity: 0; transform: translateY(40px) scale(.96); filter: blur(6px);
-  animation: cardIn 1s var(--ease-out) .35s forwards;
-}
-@keyframes cardIn { to { opacity: 1; transform: none; filter: blur(0); } }
-.login-card::before {
-  content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1.5px;
-  background: linear-gradient(90deg, transparent, var(--cyan), var(--gold), var(--cyan), transparent);
-  opacity: .75; animation: lineGlow 3.5s ease-in-out infinite;
-}
-@keyframes lineGlow { 0%,100% { opacity: .45; } 50% { opacity: 1; } }
-.login-card::after {
-  content: ''; position: absolute; inset: 0; border-radius: 24px;
-  background: radial-gradient(ellipse 90% 50% at 50% -5%, var(--cyan-dim), transparent 55%);
-  pointer-events: none;
-}
-.card-inner { position: relative; z-index: 2; }
+.search-bar{margin-bottom:12px}
+.search-bar input{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:11px;padding:11px 14px;font-size:13px}
+.search-bar input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
 
-.slogan {
-  font-family: 'Space Mono', monospace;
-  font-size: .55rem; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--cyan); text-align: center; margin-bottom: 1.3rem;
-  text-shadow: 0 0 18px var(--cyan-dim); line-height: 1.6;
+.member-row,.order-row{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px;border-radius:12px;border:1px solid var(--border2);margin-bottom:8px;transition:.2s
 }
-.auth-tabs {
-  display: flex; background: rgba(255,255,255,.03);
-  border: 1px solid var(--border2); border-radius: 13px; padding: 4px; margin-bottom: 1.5rem; gap: 4px;
-}
-.auth-tab {
-  flex: 1; text-align: center; padding: 11px 8px; border-radius: 10px;
-  font-size: .84rem; font-weight: 600; color: var(--muted); transition: all .3s var(--ease);
-}
-.auth-tab.active {
-  background: linear-gradient(135deg, var(--cyan), #0891b2); color: #000;
-  box-shadow: 0 4px 16px var(--cyan-dim);
-}
-.auth-tab:not(.active):hover { color: var(--text); background: rgba(255,255,255,.04); }
+.member-row:hover,.order-row:hover{border-color:var(--border);background:rgba(255,255,255,.02)}
+.member-row.frozen{opacity:.75;border-color:rgba(251,191,36,.3)}
+.member-row.closed{opacity:.55;border-color:rgba(255,71,87,.3)}
+.m-left{display:flex;align-items:center;gap:11px;flex:1;min-width:180px}
+.m-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#0891b2);display:grid;place-items:center;font:700 13px 'Space Grotesk';color:#000;flex-shrink:0}
+.m-name{font-size:13px;font-weight:600}
+.m-meta{font-size:11px;color:var(--muted)}
+.m-balance{font:600 13px 'Space Grotesk';color:var(--cyan);direction:ltr}
+.st{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px}
+.st.active{background:rgba(46,213,115,.12);color:var(--success)}
+.st.frozen{background:rgba(251,191,36,.12);color:var(--warning)}
+.st.closed{background:rgba(255,71,87,.12);color:var(--danger)}
+.st.pending{background:rgba(251,191,36,.12);color:var(--warning)}
+.st.approved,.st.done{background:rgba(46,213,115,.12);color:var(--success)}
+.st.rejected{background:rgba(255,71,87,.12);color:var(--danger)}
 
-.login-title {
-  font-size: clamp(1.55rem, 5vw, 1.95rem); font-weight: 800;
-  letter-spacing: -.02em; margin-bottom: .35rem; line-height: 1.2;
-}
-.login-title .acc {
-  background: linear-gradient(135deg, var(--cyan), var(--gold));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.login-sub { font-size: .86rem; color: var(--muted); line-height: 1.65; margin-bottom: 1.45rem; }
+.actions{display:flex;gap:5px;flex-wrap:wrap}
+.btn-x{padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border2);color:var(--muted);transition:.2s}
+.btn-x:hover{border-color:var(--border);color:var(--cyan)}
+.btn-x.danger:hover{border-color:var(--danger);color:var(--danger)}
+.btn-x.warn:hover{border-color:var(--warning);color:var(--warning)}
+.btn-x.ok:hover{border-color:var(--success);color:var(--success)}
 
-.form-panel { display: none; opacity: 0; transform: translateY(8px); }
-.form-panel.active { display: block; animation: panelIn .35s var(--ease) forwards; }
-@keyframes panelIn { to { opacity: 1; transform: none; } }
+.form-group{margin-bottom:11px}
+.form-label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500}
+.form-input,.form-select,.form-textarea{
+  width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border2);
+  border-radius:11px;padding:10px 12px;font-size:13px;transition:.25s
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim)}
+.form-textarea{min-height:70px;resize:vertical}
+.form-select{appearance:auto}
 
-.form-group { margin-bottom: 1.1rem; }
-.form-label {
-  display: block; font-family: 'Space Mono', monospace;
-  font-size: .52rem; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: .4rem; transition: color .25s;
-}
-.form-group:focus-within .form-label { color: var(--cyan); }
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;border-radius:11px;font-weight:700;font-size:13px;cursor:pointer;transition:.3s;width:100%}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),#0891b2);color:#000}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-warn{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted);margin-top:6px}
 
-.input-wrap { position: relative; display: flex; align-items: center; }
-.form-input, .form-select {
-  width: 100%; background: rgba(255,255,255,.03);
-  border: 1px solid var(--border); border-radius: 12px;
-  padding: 13px 14px 13px 44px; color: var(--text); font-size: .92rem; outline: none;
-  transition: border-color .25s, background .25s, box-shadow .3s var(--ease);
-}
-.form-select { appearance: auto; padding-left: 14px; cursor: pointer; }
-.form-input:hover, .form-select:hover { border-color: rgba(0,212,255,.4); }
-.form-input:focus, .form-select:focus {
-  border-color: var(--cyan); background: var(--cyan-dim);
-  box-shadow: 0 0 0 4px rgba(0,212,255,.12);
-}
-.form-input::placeholder { color: var(--muted); opacity: .5; }
-.form-input.has-error, .form-select.has-error {
-  border-color: var(--error);
-  box-shadow: 0 0 0 4px rgba(255,71,87,.12);
-  animation: shake .4s var(--ease);
-}
-@keyframes shake {
-  0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)}
-}
-.input-icon {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  left: 14px; width: 18px; height: 18px; color: var(--muted);
-  pointer-events: none; transition: color .25s;
-}
-.form-input:focus ~ .input-icon { color: var(--cyan); }
-.toggle-pass {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  left: 8px; width: 34px; height: 34px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--muted); border-radius: 8px; transition: color .25s, background .25s; z-index: 3;
-}
-.toggle-pass:hover { color: var(--cyan); background: var(--cyan-dim); }
-.toggle-pass svg { width: 17px; height: 17px; }
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;visibility:hidden;transition:.35s}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;width:100%;max-width:420px;padding:20px;transform:translateY(16px) scale(.96);transition:.35s;max-height:90vh;overflow-y:auto}
+.modal-overlay.open .modal{transform:none}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.modal-title{font-size:16px;font-weight:700}
+.modal-close{width:32px;height:32px;border-radius:9px;border:1px solid var(--border2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.modal-close:hover{border-color:var(--danger);color:var(--danger)}
 
-.form-msg {
-  font-size: .75rem; margin-top: .35rem;
-  max-height: 0; opacity: 0; overflow: hidden; transition: all .3s var(--ease);
-}
-.form-msg.show { max-height: 40px; opacity: 1; margin-top: .4rem; }
-.form-msg.error { color: var(--error); }
+.rules-box{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:12px;font-size:12px;color:var(--muted);line-height:1.75}
+.rules-box b{color:var(--text)}
+.log-item,.warn-item{padding:10px 0;border-bottom:1px solid var(--border2);font-size:12px}
+.log-item:last-child,.warn-item:last-child{border-bottom:none}
+.log-action{font-weight:600;margin-bottom:2px}
+.log-meta{color:var(--muted);font-size:11px}
 
-.form-row {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 1.3rem; gap: .8rem; flex-wrap: wrap;
-}
-.remember {
-  display: flex; align-items: center; gap: 8px;
-  font-size: .82rem; color: var(--muted);
-}
-.remember input {
-  appearance: none; width: 16px; height: 16px;
-  border: 1.5px solid var(--border); border-radius: 4px;
-  position: relative; transition: all .25s; flex-shrink: 0;
-}
-.remember input:checked { background: var(--cyan); border-color: var(--cyan); }
-.remember input:checked::after {
-  content: ''; position: absolute; left: 4px; top: 1px;
-  width: 5px; height: 8px; border: solid #000;
-  border-width: 0 2px 2px 0; transform: rotate(45deg);
-}
-.forgot { font-size: .82rem; color: var(--cyan); font-weight: 500; transition: color .25s; }
-.forgot:hover { color: #fff; }
+.ticket{background:linear-gradient(145deg,#122536,#0c1a28);border:1px solid var(--border);border-radius:16px;padding:20px;margin:12px 0;position:relative;overflow:hidden}
+.ticket::before{content:'城';position:absolute;font-size:80px;opacity:.04;left:10px;bottom:-20px}
+.ticket-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;direction:ltr}
+.ticket-logo{font:700 12px 'Space Grotesk';letter-spacing:.12em;color:var(--gold)}
+.ticket-id{font:600 11px 'Space Mono';color:var(--cyan)}
+.ticket-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px}
+.ticket-row span{color:var(--muted);font-size:11px}
+.ticket-stamp{margin-top:12px;text-align:center;font-size:11px;color:var(--success);font-weight:700}
 
-.btn-primary {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  width: 100%; background: linear-gradient(135deg, var(--cyan), #0891b2);
-  color: #000; padding: 14px 22px; border-radius: 100px;
-  font-size: .88rem; font-weight: 700; position: relative; overflow: hidden;
-  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
-  box-shadow: 0 8px 26px var(--cyan-dim);
-}
-.btn-primary .shine {
-  position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
-}
-@media (hover: hover) {
-  .btn-primary:hover .shine { left: 130%; transition: left .6s ease; }
-  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 34px rgba(0,212,255,.4); }
-}
-.btn-primary:active { transform: translateY(-1px) scale(.98); }
-.btn-primary span, .btn-primary svg { position: relative; z-index: 1; }
-.btn-primary:disabled { opacity: .55; pointer-events: none; }
-.btn-loading .btn-text, .btn-loading .btn-arrow { opacity: 0; }
-.btn-loading::after {
-  content: ''; position: absolute; width: 20px; height: 20px;
-  border: 2px solid rgba(0,0,0,.2); border-top-color: #000;
-  border-radius: 50%; animation: spin .6s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(70px);background:#0f1724;border:1px solid var(--border);border-radius:12px;padding:11px 16px;font-size:12px;display:flex;align-items:center;gap:8px;z-index:300;opacity:0;transition:.4s;max-width:92%}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast-icon{width:20px;height:20px;border-radius:50%;background:var(--success);color:#000;display:grid;place-items:center;font-size:11px;font-weight:700}
 
-.divider {
-  display: flex; align-items: center; gap: 1rem;
-  margin: 1.3rem 0 1.1rem; color: var(--muted);
-  font-size: .58rem; letter-spacing: .12em; text-transform: uppercase;
-  font-family: 'Space Mono', monospace;
-}
-.divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border2), transparent);
-}
-.social-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
-.social-btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 11px; border-radius: 12px; font-size: .82rem; font-weight: 600;
-  border: 1px solid var(--border2); background: rgba(255,255,255,.025);
-  color: var(--text); transition: all .3s var(--ease);
-}
-.social-btn:hover {
-  border-color: rgba(0,212,255,.4); background: var(--cyan-dim); transform: translateY(-2px);
-}
-.social-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
+.loading{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.loading.hide{display:none}
 
-.login-footer {
-  margin-top: 1.4rem; text-align: center;
-  font-size: .82rem; color: var(--muted);
-}
-.login-footer a { color: var(--cyan); font-weight: 600; margin-inline-start: 4px; transition: color .25s; }
-.login-footer a:hover { color: #fff; }
-
-.status-bar {
-  margin-top: 1.3rem; padding-top: .95rem; border-top: 1px solid var(--border2);
-  display: flex; align-items: center; justify-content: space-between;
-  font-family: 'Space Mono', monospace; font-size: .48rem; letter-spacing: .1em;
-  color: rgba(122,138,158,.5); text-transform: uppercase;
-}
-.status-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--success);
-  box-shadow: 0 0 8px rgba(46,213,115,.5); animation: pulse 2.2s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:.6} 50%{opacity:1} }
-
-.success-overlay {
-  position: absolute; inset: 0; background: rgba(4,7,12,.97);
-  border-radius: 24px; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: .85rem;
-  opacity: 0; pointer-events: none; transition: opacity .5s var(--ease); z-index: 20;
-}
-.success-overlay.show { opacity: 1; pointer-events: all; }
-.success-icon {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: rgba(46,213,115,.12); border: 1.5px solid rgba(46,213,115,.4);
-  display: flex; align-items: center; justify-content: center;
-  animation: scaleIn .5s var(--ease);
-}
-@keyframes scaleIn { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
-.success-icon svg { width: 28px; height: 28px; color: var(--success); }
-.success-text { font-size: 1.15rem; font-weight: 700; }
-.success-sub { font-size: .84rem; color: var(--muted); text-align: center; padding: 0 1rem; }
-
-@media (max-width: 768px) {
-  .orb-1 { width: 260px; height: 260px; filter: blur(60px); }
-  .orb-2 { width: 180px; height: 180px; filter: blur(50px); }
-  .orb-3 { display: none; }
-  header { padding: 1rem 1rem; }
-  .login-card { border-radius: 20px; padding: 1.75rem 1.4rem 1.6rem; }
-}
-@media (max-width: 480px) {
-  .login-card { padding: 1.6rem 1.2rem 1.45rem; border-radius: 18px; }
-  .social-row { grid-template-columns: 1fr; }
-  .status-bar { flex-direction: column; gap: .35rem; text-align: center; }
-}
+@media(max-width:700px){.stats-row{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 
-<div id="loader">
-  <div class="loader-logo">SHIRO BANK</div>
-  <div class="loader-bar-wrap"><div class="loader-bar" id="loaderBar"></div></div>
-  <div class="loader-pct" id="loaderPct">0%</div>
+<div class="loading" id="loading">
+  <div style="font:700 16px 'Space Grotesk';color:var(--cyan);letter-spacing:.15em">SHIRO ADMIN</div>
+  <div style="font-size:12px;color:var(--muted)">جاري التحقق...</div>
 </div>
 
-<div id="cursor-dot"></div>
-<div id="cursor-ring"></div>
-<canvas id="bg-canvas"></canvas>
-<div id="noise"></div>
-<div class="grid-overlay"></div>
-<div class="vignette"></div>
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <div class="crest">城</div>
+      <div><strong>SHIRO BANK</strong><small>ADMIN PANEL</small></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="badge-admin">ADMIN</span>
+      <button class="btn-x" onclick="location.href='dashboard.html'">العودة</button>
+      <button class="btn-x danger" id="logoutBtn">خروج</button>
+    </div>
+  </div>
+</header>
 
 <div class="wrap">
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-
-  <header>
-    <a href="index.html" class="logo hover-target">
-      <div class="crest">城</div>
-      <div class="logo-name"><span>SHIRO</span><span>BANK</span></div>
-    </a>
-    <a href="index.html" class="back-home hover-target">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M19 12H5M12 19l-7-7 7-7"/>
-      </svg>
-      <span>الرئيسية</span>
-    </a>
-  </header>
-
-  <section class="login-section">
-    <div class="login-card" id="loginCard">
-      <div class="card-inner">
-        <div class="slogan">ثروة المملكة تحت حماية العرش</div>
-
-        <div class="auth-tabs">
-          <button class="auth-tab active hover-target" data-tab="login">تسجيل الدخول</button>
-          <button class="auth-tab hover-target" data-tab="register">إنشاء حساب</button>
-        </div>
-
-        <!-- Login -->
-        <div class="form-panel active" id="panel-login">
-          <h1 class="login-title">مرحبًا <span class="acc">بعودتك</span></h1>
-          <p class="login-sub">سجّل دخولك بالإيميل وكلمة المرور للوصول إلى محفظتك.</p>
-          <form id="loginForm" novalidate>
-            <div class="form-group">
-              <label class="form-label">البريد الإلكتروني</label>
-              <div class="input-wrap">
-                <input type="email" id="loginEmail" class="form-input hover-target" placeholder="بريدك@مثال.com" required autocomplete="email">
-                <span class="input-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                    <polyline points="22,6 12,13 2,6"/>
-                  </svg>
-                </span>
-              </div>
-              <div class="form-msg" id="loginEmailMsg"></div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">كلمة المرور</label>
-              <div class="input-wrap">
-                <input type="password" id="loginPass" class="form-input hover-target" placeholder="••••••••" required autocomplete="current-password">
-                <button type="button" class="toggle-pass hover-target" data-target="loginPass">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                  </svg>
-                </button>
-              </div>
-              <div class="form-msg" id="loginPassMsg"></div>
-            </div>
-            <div class="form-row">
-              <label class="remember hover-target"><input type="checkbox"><span>تذكرني</span></label>
-              <a href="#" class="forgot hover-target" id="forgotLink">نسيت كلمة المرور؟</a>
-            </div>
-            <button type="submit" class="btn-primary hover-target" id="loginBtn">
-              <span class="shine"></span>
-              <span class="btn-text">دخول البنك</span>
-              <svg class="btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </button>
-          </form>
-        </div>
-
-        <!-- Register -->
-        <div class="form-panel" id="panel-register">
-          <h1 class="login-title">انضم إلى <span class="acc">المملكة</span></h1>
-          <p class="login-sub">أنشئ حسابك باللقب والنقابة والإيميل وابدأ جمع النقاط.</p>
-          <form id="registerForm" novalidate>
-            <div class="form-group">
-              <label class="form-label">اللقب</label>
-              <div class="input-wrap">
-                <input type="text" id="regNick" class="form-input hover-target" placeholder="لقبك داخل المملكة" required autocomplete="nickname">
-                <span class="input-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                  </svg>
-                </span>
-              </div>
-              <div class="form-msg" id="regNickMsg"></div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">النقابة</label>
-              <select id="regGuild" class="form-select hover-target" required>
-                <option value="">— اختر نقابتك —</option>
-                <option value="VIOD">VIOD</option>
-                <option value="أنمي العرب">أنمي العرب</option>
-                <option value="أوتاكو مصر">أوتاكو مصر</option>
-                <option value="ون بيس">ون بيس</option>
-                <option value="ناروتو">ناروتو</option>
-                <option value="بليتش">بليتش</option>
-                <option value="هجوم العمالقة">هجوم العمالقة</option>
-                <option value="جوجوتسو">جوجوتسو</option>
-                <option value="ون بنش">ون بنش</option>
-                <option value="ديمون سلاير">ديمون سلاير</option>
-              </select>
-              <div class="form-msg" id="regGuildMsg"></div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">البريد الإلكتروني</label>
-              <div class="input-wrap">
-                <input type="email" id="regEmail" class="form-input hover-target" placeholder="بريدك@مثال.com" required autocomplete="email">
-                <span class="input-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                    <polyline points="22,6 12,13 2,6"/>
-                  </svg>
-                </span>
-              </div>
-              <div class="form-msg" id="regEmailMsg"></div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">كلمة المرور</label>
-              <div class="input-wrap">
-                <input type="password" id="regPass" class="form-input hover-target" placeholder="••••••••" required autocomplete="new-password">
-                <button type="button" class="toggle-pass hover-target" data-target="regPass">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                  </svg>
-                </button>
-              </div>
-              <div class="form-msg" id="regPassMsg"></div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">تأكيد كلمة المرور</label>
-              <div class="input-wrap">
-                <input type="password" id="regConfirm" class="form-input hover-target" placeholder="••••••••" required autocomplete="new-password">
-                <button type="button" class="toggle-pass hover-target" data-target="regConfirm">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                  </svg>
-                </button>
-              </div>
-              <div class="form-msg" id="regConfirmMsg"></div>
-            </div>
-            <button type="submit" class="btn-primary hover-target" id="regBtn">
-              <span class="shine"></span>
-              <span class="btn-text">إنشاء حساب</span>
-              <svg class="btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </button>
-          </form>
-        </div>
-
-        <div class="login-footer">
-          تحتاج مساعدة؟ <a href="#" class="hover-target">تواصل معنا</a>
-        </div>
-        <div class="status-bar">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="status-dot"></span>
-            <span>أنظمة البنك متصلة</span>
-          </div>
-          <span>SHIRO · 2026</span>
-        </div>
-      </div>
-
-      <div class="success-overlay" id="successOverlay">
-        <div class="success-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-        </div>
-        <div class="success-text" id="successTitle">تم الدخول بنجاح</div>
-        <div class="success-sub">جاري التحويل إلى لوحة الحساب...</div>
-      </div>
-    </div>
-  </section>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-sec="home">نظرة عامة</button>
+    <button class="nav-tab" data-sec="members">الأعضاء</button>
+    <button class="nav-tab" data-sec="points">النقاط</button>
+    <button class="nav-tab" data-sec="warnings">الإنذارات</button>
+    <button class="nav-tab" data-sec="rules">القواعد</button>
+    <button class="nav-tab" data-sec="orders">الطلبات <span class="dot" id="ordersDot" style="display:none"></span></button>
+    <button class="nav-tab" data-sec="store">المتجر</button>
+    <button class="nav-tab" data-sec="logs">السجل</button>
+  </div>
 </div>
+
+<section class="section active" id="sec-home">
+  <div class="wrap">
+    <h1 class="page-title">لوحة الأدمن</h1>
+    <p class="page-sub">البيانات مباشرة من Firebase</p>
+    <div class="stats-row">
+      <div class="stat-box"><span class="stat-val" id="sTotal">0</span><span class="stat-label">أعضاء</span></div>
+      <div class="stat-box"><span class="stat-val" id="sActive">0</span><span class="stat-label">نشط</span></div>
+      <div class="stat-box"><span class="stat-val" id="sPending">0</span><span class="stat-label">طلبات معلقة</span></div>
+      <div class="stat-box"><span class="stat-val" id="sWarn">0</span><span class="stat-label">إنذارات</span></div>
+    </div>
+    <div class="panel"><div class="panel-title">آخر العمليات</div><div id="homeLogs"></div></div>
+  </div>
+</section>
+
+<section class="section" id="sec-members">
+  <div class="wrap">
+    <h1 class="page-title">إدارة الأعضاء</h1>
+    <p class="page-sub">تجميد · إغلاق · تعديل · إنذار</p>
+    <div class="search-bar"><input id="mSearch" placeholder="ابحث بالاسم أو الرقم..." oninput="renderMembers()"></div>
+    <div id="membersList"></div>
+  </div>
+</section>
+
+<section class="section" id="sec-points">
+  <div class="wrap">
+    <h1 class="page-title">إضافة / خصم نقاط</h1>
+    <p class="page-sub">يتحدّث الرصيد فورًا في حساب العضو</p>
+    <div class="panel">
+      <form id="pointsForm">
+        <div class="form-group"><label class="form-label">العضو</label><select class="form-select" id="pMember" required></select></div>
+        <div class="form-group"><label class="form-label">العملية</label>
+          <select class="form-select" id="pType"><option value="add">إضافة</option><option value="deduct">خصم</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">المبلغ</label><input class="form-input" type="number" id="pAmount" min="1" required></div>
+        <div class="form-group"><label class="form-label">السبب</label><input class="form-input" id="pReason" required></div>
+        <button class="btn btn-primary" type="submit">تنفيذ</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="sec-warnings">
+  <div class="wrap">
+    <h1 class="page-title">الإنذارات</h1>
+    <p class="page-sub">تسجيل إنذار + تطبيق القواعد التلقائية</p>
+    <div class="panel">
+      <form id="warnForm">
+        <div class="form-group"><label class="form-label">العضو</label><select class="form-select" id="wMember" required></select></div>
+        <div class="form-group"><label class="form-label">السبب</label><textarea class="form-textarea" id="wReason" required></textarea></div>
+        <button class="btn btn-warn" type="submit">تسجيل إنذار</button>
+      </form>
+    </div>
+    <div class="panel"><div class="panel-title">سجل الإنذارات</div><div id="warnList"></div></div>
+  </div>
+</section>
+
+<section class="section" id="sec-rules">
+  <div class="wrap">
+    <h1 class="page-title">قواعد النظام</h1>
+    <p class="page-sub">تتحكّم في أرقام الإنذارات</p>
+    <div class="rules-box" id="rulesPreview"></div>
+    <div class="panel">
+      <div class="form-group"><label class="form-label">عند كام إنذار يحصل خصم؟</label><input class="form-input" type="number" id="rDeductAt" min="1"></div>
+      <div class="form-group"><label class="form-label">مبلغ الخصم</label><input class="form-input" type="number" id="rDeductAmt" min="0"></div>
+      <div class="form-group"><label class="form-label">عند كام إنذار يحصل تجميد؟</label><input class="form-input" type="number" id="rFreezeAt" min="1"></div>
+      <div class="form-group"><label class="form-label">أيام التجميد</label><input class="form-input" type="number" id="rFreezeDays" min="1"></div>
+      <div class="form-group"><label class="form-label">عند كام إنذار يتقفل الحساب؟</label><input class="form-input" type="number" id="rCloseAt" min="1"></div>
+      <button class="btn btn-primary" type="button" id="saveRulesBtn">حفظ القواعد</button>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="sec-store"><div class="wrap"><h1 class="page-title">إدارة المتجر</h1><p class="page-sub">الأقسام والمنتجات اليومية</p><div class="panel"><div class="panel-title">إضافة منتج</div><form id="productForm"><div class="form-group"><label class="form-label">اسم المنتج</label><input class="form-input" id="prodName" required></div><div class="form-group"><label class="form-label">القسم</label><input class="form-input" id="prodCategory" placeholder="زيارات" required></div><div class="form-group"><label class="form-label">الوصف</label><input class="form-input" id="prodDesc"></div><div class="form-group"><label class="form-label">سعر اليوم</label><input class="form-input" type="number" id="prodPrice" min="1" required></div><div class="form-group"><label class="form-label">أقل أيام</label><input class="form-input" type="number" id="prodMin" value="1" min="1"></div><div class="form-group"><label class="form-label">أقصى أيام</label><input class="form-input" type="number" id="prodMax" value="7" min="1"></div><div class="form-group"><label class="form-label">الأيام المتاحة (اختياري)</label><input class="form-input" id="prodDays" placeholder="friday,saturday"></div><button class="btn btn-primary">إضافة المنتج</button></form></div><div id="productsAdminList"></div></div></section>
+
+<section class="section" id="sec-orders">
+  <div class="wrap">
+    <h1 class="page-title">الطلبات</h1>
+    <p class="page-sub">موافقة / رفض · إنشاء تذكرة</p>
+    <div id="ordersList"></div>
+  </div>
+</section>
+
+<section class="section" id="sec-logs">
+  <div class="wrap">
+    <h1 class="page-title">سجل الأدمن</h1>
+    <p class="page-sub">آخر الإجراءات</p>
+    <div class="panel" id="logsList"></div>
+  </div>
+</section>
+
+<!-- Modals -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">تعديل عضو</div><button class="modal-close" data-close="edit">✕</button></div>
+    <div class="form-group"><label class="form-label">النقابة</label><input class="form-input" id="editGuild"></div>
+    <div class="form-group"><label class="form-label">الرتبة</label><input class="form-input" id="editRank"></div>
+    <button class="btn btn-primary" id="saveEditBtn">حفظ</button>
+    <button class="btn btn-ghost" data-close="edit">إلغاء</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-freeze">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">تجميد حساب</div><button class="modal-close" data-close="freeze">✕</button></div>
+    <p style="font-size:13px;margin-bottom:12px" id="freezeLabel"></p>
+    <div class="form-group"><label class="form-label">المدة (أيام)</label><input class="form-input" type="number" id="freezeDays" value="3" min="1"></div>
+    <button class="btn btn-warn" id="confirmFreezeBtn">تأكيد التجميد</button>
+    <button class="btn btn-ghost" data-close="freeze">إلغاء</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ticket">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">تذكرة معتمدة</div><button class="modal-close" data-close="ticket">✕</button></div>
+    <div id="ticketBox"></div>
+    <button class="btn btn-primary" onclick="window.print()">طباعة / حفظ</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toastMsg"></span></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import {
-  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  sendPasswordResetEmail, updateProfile, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-import {
-  getFirestore, doc, setDoc, serverTimestamp
+  getFirestore, collection, getDocs, doc, getDoc, updateDoc, addDoc,
+  query, orderBy, limit, serverTimestamp, increment, setDoc, writeBatch
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -609,265 +311,442 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* لو المستخدم مسجّل دخول بالفعل → dashboard */
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // ممكن تسيب الصفحة أو تحوّل مباشرة
-    // location.href = 'dashboard.html';
-  }
-});
+let members = [];
+let orders = [];
+let warnings = [];
+let logs = [];
+let rules = { deductAt: 3, deductAmt: 100, freezeAt: 5, freezeDays: 3, closeAt: 7 };
+let selUid = null;
 
-const isTouch = matchMedia('(hover: none), (pointer: coarse)').matches;
-const isMobile = matchMedia('(max-width: 768px)').matches;
-
-document.querySelectorAll('.auth-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-  });
-});
-
-document.querySelectorAll('.toggle-pass').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const input = document.getElementById(btn.dataset.target);
-    const isPass = input.type === 'password';
-    input.type = isPass ? 'text' : 'password';
-    btn.querySelector('svg').innerHTML = isPass
-      ? `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`
-      : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
-  });
-});
-
-function showMsg(el, text) {
-  el.textContent = text;
-  el.className = 'form-msg error show';
+function toast(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
 }
-function hideMsg(el) {
-  el.className = 'form-msg';
-  el.textContent = '';
+function stLabel(s) {
+  return { active:'نشط', frozen:'مجمّد', closed:'مغلق', pending:'معلق', approved:'مقبول', done:'مكتمل', rejected:'مرفوض' }[s] || s;
 }
-function showSuccess(title) {
-  document.getElementById('successTitle').textContent = title;
-  document.getElementById('successOverlay').classList.add('show');
-  setTimeout(() => { location.href = 'dashboard.html'; }, 1500);
-}
-function firebaseErrorMsg(code) {
-  const map = {
-    'auth/email-already-in-use': 'هذا الإيميل مسجّل بالفعل',
-    'auth/invalid-email': 'البريد الإلكتروني غير صحيح',
-    'auth/weak-password': 'كلمة المرور ضعيفة (6 أحرف على الأقل)',
-    'auth/user-not-found': 'لا يوجد حساب بهذا الإيميل',
-    'auth/wrong-password': 'كلمة المرور غير صحيحة',
-    'auth/invalid-credential': 'الإيميل أو كلمة المرور غير صحيحة',
-    'auth/too-many-requests': 'محاولات كثيرة، حاول لاحقًا',
-    'auth/network-request-failed': 'مشكلة في الاتصال بالإنترنت',
-  };
-  return map[code] || 'حدث خطأ، حاول مرة أخرى';
-}
-
-/* ===== تسجيل الدخول ===== */
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('loginEmail');
-  const pass = document.getElementById('loginPass');
-  const emailMsg = document.getElementById('loginEmailMsg');
-  const passMsg = document.getElementById('loginPassMsg');
-  hideMsg(emailMsg); hideMsg(passMsg);
-  email.classList.remove('has-error');
-  pass.classList.remove('has-error');
-
-  let ok = true;
-  if (!email.value.trim() || !email.value.includes('@')) {
-    showMsg(emailMsg, 'أدخل بريدًا إلكترونيًا صحيحًا');
-    email.classList.add('has-error'); ok = false;
-  }
-  if (pass.value.length < 6) {
-    showMsg(passMsg, 'كلمة المرور يجب ألا تقل عن 6 أحرف');
-    pass.classList.add('has-error'); ok = false;
-  }
-  if (!ok) return;
-
-  const btn = document.getElementById('loginBtn');
-  btn.classList.add('btn-loading');
-  btn.disabled = true;
-
-  try {
-    await signInWithEmailAndPassword(auth, email.value.trim(), pass.value);
-    showSuccess('تم الدخول بنجاح');
-  } catch (err) {
-    showMsg(passMsg, firebaseErrorMsg(err.code));
-    pass.classList.add('has-error');
-  } finally {
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-  }
+function openM(id) { document.getElementById('modal-' + id).classList.add('open'); }
+function closeM(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => closeM(btn.dataset.close));
+});
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
 
-/* ===== إنشاء حساب ===== */
-document.getElementById('registerForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const nick = document.getElementById('regNick');
-  const guild = document.getElementById('regGuild');
-  const email = document.getElementById('regEmail');
-  const pass = document.getElementById('regPass');
-  const confirm = document.getElementById('regConfirm');
+function switchSec(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.sec === id));
+  document.getElementById('sec-' + id).classList.add('active');
+}
+document.querySelectorAll('.nav-tab').forEach(t => t.addEventListener('click', () => switchSec(t.dataset.sec)));
 
-  [document.getElementById('regNickMsg'), document.getElementById('regGuildMsg'),
-   document.getElementById('regEmailMsg'), document.getElementById('regPassMsg'),
-   document.getElementById('regConfirmMsg')].forEach(hideMsg);
-  [nick, guild, email, pass, confirm].forEach(i => i.classList.remove('has-error'));
-
-  let ok = true;
-  if (!nick.value.trim() || nick.value.trim().length < 2) {
-    showMsg(document.getElementById('regNickMsg'), 'أدخل لقبك');
-    nick.classList.add('has-error'); ok = false;
-  }
-  if (!guild.value) {
-    showMsg(document.getElementById('regGuildMsg'), 'اختر نقابتك');
-    guild.classList.add('has-error'); ok = false;
-  }
-  if (!email.value.trim() || !email.value.includes('@')) {
-    showMsg(document.getElementById('regEmailMsg'), 'أدخل بريدًا إلكترونيًا صحيحًا');
-    email.classList.add('has-error'); ok = false;
-  }
-  if (pass.value.length < 6) {
-    showMsg(document.getElementById('regPassMsg'), 'كلمة المرور يجب ألا تقل عن 6 أحرف');
-    pass.classList.add('has-error'); ok = false;
-  }
-  if (pass.value !== confirm.value) {
-    showMsg(document.getElementById('regConfirmMsg'), 'كلمتا المرور غير متطابقتين');
-    confirm.classList.add('has-error'); ok = false;
-  }
-  if (!ok) return;
-
-  const btn = document.getElementById('regBtn');
-  btn.classList.add('btn-loading');
-  btn.disabled = true;
-
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email.value.trim(), pass.value);
-    const user = cred.user;
-
-    await updateProfile(user, { displayName: nick.value.trim() });
-
-    // رقم عضو بسيط
-    const memberId = 'SHR-' + String(Math.floor(1000 + Math.random() * 9000));
-
-    await setDoc(doc(db, 'members', user.uid), {
-      uid: user.uid,
-      nickname: nick.value.trim(),
-      email: email.value.trim(),
-      guild: guild.value,
-      rank: 'عضو',
-      memberId: memberId,
-      balance: 100,          // رصيد بداية
-      status: 'active',
-      warnings: 0,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-
-    showSuccess('تم إنشاء الحساب');
-  } catch (err) {
-    const msg = firebaseErrorMsg(err.code);
-    if (err.code === 'auth/email-already-in-use') {
-      showMsg(document.getElementById('regEmailMsg'), msg);
-      email.classList.add('has-error');
-    } else {
-      showMsg(document.getElementById('regPassMsg'), msg);
-    }
-  } finally {
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-  }
-});
-
-/* نسيت كلمة المرور */
-document.getElementById('forgotLink').addEventListener('click', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('loginEmail').value.trim();
-  if (!email || !email.includes('@')) {
-    showMsg(document.getElementById('loginEmailMsg'), 'اكتب إيميلك أولاً ثم اضغط نسيت كلمة المرور');
-    document.getElementById('loginEmail').classList.add('has-error');
+/* Auth */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    location.href = 'login.html';
     return;
   }
   try {
-    await sendPasswordResetEmail(auth, email);
-    showMsg(document.getElementById('loginEmailMsg'), 'تم إرسال رابط إعادة التعيين إلى بريدك');
-    document.getElementById('loginEmailMsg').className = 'form-msg show';
-    document.getElementById('loginEmailMsg').style.color = 'var(--success)';
-  } catch (err) {
-    showMsg(document.getElementById('loginEmailMsg'), firebaseErrorMsg(err.code));
+    const snap = await getDoc(doc(db, 'members', user.uid));
+    if (!snap.exists() || snap.data().role !== 'admin') {
+      alert('ليس لديك صلاحية الأدمن.\nأضف role = admin في مستندك داخل Firestore.');
+      location.href = 'dashboard.html';
+      return;
+    }
+    await loadAll();
+    document.getElementById('loading').classList.add('hide');
+  } catch (e) {
+    console.error(e);
+    toast('خطأ في التحميل');
+    document.getElementById('loading').classList.add('hide');
   }
 });
 
-/* Cursor + Particles + Loader (نفس اللي قبل) */
-if (!isTouch) {
-  let mx = 0, my = 0, cx = 0, cy = 0;
-  const dot = document.getElementById('cursor-dot');
-  const ring = document.getElementById('cursor-ring');
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-  (function anim() {
-    cx += (mx - cx) * 0.14; cy += (my - cy) * 0.14;
-    if (dot) { dot.style.left = mx + 'px'; dot.style.top = my + 'px'; }
-    if (ring) { ring.style.left = cx + 'px'; ring.style.top = cy + 'px'; }
-    requestAnimationFrame(anim);
-  })();
-  document.querySelectorAll('.hover-target').forEach(el => {
-    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-  });
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await signOut(auth);
+  location.href = 'login.html';
+});
+
+async function loadAll() {
+  await Promise.all([loadMembers(), loadOrders(), loadWarnings(), loadRules(), loadLogs()]);
+  await loadProductsAdmin();
+  renderMembers();
+  renderOrders();
+  renderWarns();
+  renderRules();
+  renderLogs();
+  updateStats();
 }
 
-(function () {
-  const canvas = document.getElementById('bg-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let W, H, particles = [];
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
-  addEventListener('resize', resize); resize();
-  const count = reduced ? 0 : (isMobile ? 14 : Math.min(45, Math.floor(innerWidth / 26)));
-  for (let i = 0; i < count; i++) {
-    particles.push({
-      x: Math.random() * W, y: Math.random() * H,
-      r: Math.random() * 1.2 + 0.25,
-      vx: (Math.random() - 0.5) * (isMobile ? 0.1 : 0.2),
-      vy: (Math.random() - 0.5) * (isMobile ? 0.1 : 0.2),
-      alpha: Math.random() * 0.4 + 0.12
-    });
-  }
-  function draw() {
-    if (reduced || count === 0) return;
-    ctx.clearRect(0, 0, W, H);
-    particles.forEach(p => {
-      p.x += p.vx; p.y += p.vy;
-      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
-      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(0,212,255,${p.alpha})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
+async function loadMembers() {
+  const snap = await getDocs(collection(db, 'members'));
+  members = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+}
 
-const loaderBar = document.getElementById('loaderBar');
-const loaderPct = document.getElementById('loaderPct');
-let pct = 0;
-const pctTimer = setInterval(() => {
-  pct += Math.random() * 16;
-  if (pct >= 100) { pct = 100; clearInterval(pctTimer); }
-  loaderBar.style.width = pct + '%';
-  loaderPct.textContent = Math.floor(pct) + '%';
-}, 55);
-window.addEventListener('load', () => {
-  setTimeout(() => document.getElementById('loader').classList.add('done'), 350);
+async function loadOrders() {
+  try {
+    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(50));
+    const snap = await getDocs(q);
+    orders = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+  } catch {
+    const snap = await getDocs(collection(db, 'orders'));
+    orders = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+  }
+}
+
+async function loadWarnings() {
+  try {
+    const q = query(collection(db, 'warnings'), orderBy('createdAt', 'desc'), limit(40));
+    const snap = await getDocs(q);
+    warnings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch {
+    warnings = [];
+  }
+}
+
+async function loadRules() {
+  const snap = await getDoc(doc(db, 'config', 'rules'));
+  if (snap.exists()) rules = { ...rules, ...snap.data() };
+}
+
+async function loadLogs() {
+  try {
+    const q = query(collection(db, 'adminLogs'), orderBy('createdAt', 'desc'), limit(30));
+    const snap = await getDocs(q);
+    logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch {
+    logs = [];
+  }
+}
+
+async function addLog(action) {
+  logs.unshift({ action, createdAt: new Date() });
+  renderLogs();
+  try {
+    await addDoc(collection(db, 'adminLogs'), { action, createdAt: serverTimestamp() });
+  } catch {}
+}
+
+function updateStats() {
+  document.getElementById('sTotal').textContent = members.length;
+  document.getElementById('sActive').textContent = members.filter(m => (m.status || 'active') === 'active').length;
+  document.getElementById('sPending').textContent = orders.filter(o => o.status === 'pending').length;
+  document.getElementById('sWarn').textContent = warnings.length;
+  document.getElementById('ordersDot').style.display = orders.some(o => o.status === 'pending') ? 'inline-block' : 'none';
+}
+
+/* Members UI */
+window.renderMembers = function() {
+  const q = (document.getElementById('mSearch')?.value || '').toLowerCase();
+  let list = members;
+  if (q) {
+    list = members.filter(m =>
+      (m.nickname || '').toLowerCase().includes(q) ||
+      (m.memberId || '').toLowerCase().includes(q) ||
+      (m.email || '').toLowerCase().includes(q)
+    );
+  }
+  document.getElementById('membersList').innerHTML = list.map(m => {
+    const st = m.status || 'active';
+    return `
+    <div class="member-row ${st}">
+      <div class="m-left">
+        <div class="m-avatar">${(m.nickname || '?')[0]}</div>
+        <div>
+          <div class="m-name">${m.nickname || '—'} <span class="st ${st}">${stLabel(st)}</span></div>
+          <div class="m-meta">${m.memberId || m.uid.slice(0,8)} · ${m.guild || '—'} · ${m.rank || 'عضو'}${m.warnings ? ` · <span style="color:var(--warning)">${m.warnings} إنذار</span>` : ''}</div>
+          <div class="m-balance">${Number(m.balance || 0).toLocaleString()} نقطة</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-x" onclick="openEdit('${m.uid}')">تعديل</button>
+        ${st !== 'active' ? `<button class="btn-x ok" onclick="reactivate('${m.uid}')">تشغيل</button>` : ''}
+        <button class="btn-x warn" onclick="openFreeze('${m.uid}')">تجميد</button>
+        <button class="btn-x" onclick="quickWarn('${m.uid}')">إنذار</button>
+        <button class="btn-x danger" onclick="closeAccount('${m.uid}')">إغلاق</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="panel" style="text-align:center;color:var(--muted)">لا يوجد أعضاء</div>';
+
+  const opts = members.map(m => `<option value="${m.uid}">${m.nickname || m.email} (${m.memberId || ''})</option>`).join('');
+  document.getElementById('pMember').innerHTML = opts;
+  document.getElementById('wMember').innerHTML = opts;
+  updateStats();
+};
+
+window.openEdit = function(uid) {
+  selUid = uid;
+  const m = members.find(x => x.uid === uid);
+  document.getElementById('editGuild').value = m.guild || '';
+  document.getElementById('editRank').value = m.rank || '';
+  openM('edit');
+};
+
+document.getElementById('saveEditBtn').addEventListener('click', async () => {
+  if (!selUid) return;
+  const guild = document.getElementById('editGuild').value.trim();
+  const rank = document.getElementById('editRank').value.trim();
+  await updateDoc(doc(db, 'members', selUid), { guild, rank, updatedAt: serverTimestamp() });
+  const m = members.find(x => x.uid === selUid);
+  if (m) { m.guild = guild; m.rank = rank; }
+  await addLog(`تعديل ${m?.nickname}: نقابة=${guild} رتبة=${rank}`);
+  closeM('edit');
+  renderMembers();
+  toast('تم التعديل');
 });
+
+window.openFreeze = function(uid) {
+  selUid = uid;
+  const m = members.find(x => x.uid === uid);
+  document.getElementById('freezeLabel').textContent = 'تجميد حساب: ' + (m?.nickname || '');
+  openM('freeze');
+};
+
+document.getElementById('confirmFreezeBtn').addEventListener('click', async () => {
+  if (!selUid) return;
+  const days = +document.getElementById('freezeDays').value || 3;
+  await updateDoc(doc(db, 'members', selUid), { status: 'frozen', updatedAt: serverTimestamp() });
+  const m = members.find(x => x.uid === selUid);
+  if (m) m.status = 'frozen';
+  await addLog(`تجميد ${m?.nickname} لمدة ${days} يوم`);
+  closeM('freeze');
+  renderMembers();
+  toast('تم التجميد');
+});
+
+window.reactivate = async function(uid) {
+  await updateDoc(doc(db, 'members', uid), { status: 'active', updatedAt: serverTimestamp() });
+  const m = members.find(x => x.uid === uid);
+  if (m) m.status = 'active';
+  await addLog(`تشغيل ${m?.nickname}`);
+  renderMembers();
+  toast('تم التشغيل');
+};
+
+window.closeAccount = async function(uid) {
+  if (!confirm('إغلاق الحساب؟')) return;
+  await updateDoc(doc(db, 'members', uid), { status: 'closed', updatedAt: serverTimestamp() });
+  const m = members.find(x => x.uid === uid);
+  if (m) m.status = 'closed';
+  await addLog(`إغلاق حساب ${m?.nickname}`);
+  renderMembers();
+  toast('تم الإغلاق');
+};
+
+/* Points */
+document.getElementById('pointsForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const uid = document.getElementById('pMember').value;
+  const type = document.getElementById('pType').value;
+  const amt = +document.getElementById('pAmount').value;
+  const reason = document.getElementById('pReason').value;
+  const m = members.find(x => x.uid === uid);
+  if (!m) return;
+
+  const delta = type === 'add' ? amt : -amt;
+  await updateDoc(doc(db, 'members', uid), {
+    balance: increment(delta),
+    updatedAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'transactions'), {
+    uid,
+    name: (type === 'add' ? 'إضافة إدارية: ' : 'خصم إداري: ') + reason,
+    amount: delta,
+    createdAt: serverTimestamp()
+  });
+  m.balance = Math.max(0, (m.balance || 0) + delta);
+  await addLog(`${type === 'add' ? 'إضافة' : 'خصم'} ${amt} لـ ${m.nickname} — ${reason}`);
+  e.target.reset();
+  renderMembers();
+  toast('تم تنفيذ العملية');
+});
+
+/* Warnings */
+document.getElementById('warnForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  await applyWarn(document.getElementById('wMember').value, document.getElementById('wReason').value);
+  e.target.reset();
+});
+
+window.quickWarn = async function(uid) {
+  const r = prompt('سبب الإنذار:');
+  if (r) await applyWarn(uid, r);
+};
+
+async function applyWarn(uid, reason) {
+  const m = members.find(x => x.uid === uid);
+  if (!m) return;
+  const newCount = (m.warnings || 0) + 1;
+  const updates = { warnings: newCount, updatedAt: serverTimestamp() };
+
+  await addDoc(collection(db, 'warnings'), {
+    uid,
+    memberName: m.nickname,
+    memberId: m.memberId,
+    reason,
+    createdAt: serverTimestamp()
+  });
+
+  if (newCount === rules.deductAt && rules.deductAmt > 0) {
+    updates.balance = increment(-rules.deductAmt);
+    m.balance = Math.max(0, (m.balance || 0) - rules.deductAmt);
+    await addDoc(collection(db, 'transactions'), {
+      uid, name: 'خصم تلقائي بسبب الإنذارات', amount: -rules.deductAmt, createdAt: serverTimestamp()
+    });
+    toast(`${m.nickname}: خصم تلقائي ${rules.deductAmt}`);
+  }
+  if (newCount === rules.freezeAt && (m.status || 'active') === 'active') {
+    updates.status = 'frozen';
+    m.status = 'frozen';
+    toast(`${m.nickname}: تم التجميد تلقائيًا`);
+  }
+  if (newCount >= rules.closeAt) {
+    updates.status = 'closed';
+    m.status = 'closed';
+    toast(`${m.nickname}: تم إغلاق الحساب تلقائيًا`);
+  }
+
+  await updateDoc(doc(db, 'members', uid), updates);
+  m.warnings = newCount;
+  warnings.unshift({ memberName: m.nickname, reason, memberId: m.memberId, createdAt: new Date() });
+  await addLog(`إنذار (${newCount}) لـ ${m.nickname}: ${reason}`);
+  renderMembers();
+  renderWarns();
+  updateStats();
+}
+
+function renderWarns() {
+  document.getElementById('warnList').innerHTML = warnings.length ? warnings.map(w => `
+    <div class="warn-item">
+      <div class="log-action">${w.memberName || '—'} — ${w.reason}</div>
+      <div class="log-meta">${w.memberId || ''} · ${w.createdAt?.toDate ? w.createdAt.toDate().toLocaleString('ar-EG') : 'الآن'}</div>
+    </div>
+  `).join('') : '<div style="color:var(--muted)">لا توجد إنذارات</div>';
+}
+
+/* Rules */
+function renderRules() {
+  document.getElementById('rDeductAt').value = rules.deductAt;
+  document.getElementById('rDeductAmt').value = rules.deductAmt;
+  document.getElementById('rFreezeAt').value = rules.freezeAt;
+  document.getElementById('rFreezeDays').value = rules.freezeDays;
+  document.getElementById('rCloseAt').value = rules.closeAt;
+  document.getElementById('rulesPreview').innerHTML = `
+    <b>${rules.deductAt} إنذارات:</b> خصم ${rules.deductAmt} نقطة<br>
+    <b>${rules.freezeAt} إنذارات:</b> تجميد ${rules.freezeDays} أيام<br>
+    <b>${rules.closeAt}+ إنذارات:</b> إغلاق الحساب
+  `;
+}
+
+document.getElementById('saveRulesBtn').addEventListener('click', async () => {
+  rules = {
+    deductAt: +document.getElementById('rDeductAt').value || 3,
+    deductAmt: +document.getElementById('rDeductAmt').value || 0,
+    freezeAt: +document.getElementById('rFreezeAt').value || 5,
+    freezeDays: +document.getElementById('rFreezeDays').value || 3,
+    closeAt: +document.getElementById('rCloseAt').value || 7
+  };
+  await setDoc(doc(db, 'config', 'rules'), rules, { merge: true });
+  renderRules();
+  await addLog('تحديث قواعد الإنذارات');
+  toast('تم حفظ القواعد');
+});
+
+async function loadProductsAdmin(){ try { const snap=await getDocs(collection(db,'products')); const list=document.getElementById('productsAdminList'); const products=snap.docs.map(d=>({id:d.id,...d.data()})); list.innerHTML=products.map(p=>`<div class="order-row"><div><b>${p.name}</b><div class="m-meta">${p.category||''} · ${Number(p.pricePerDay||0).toLocaleString()} نقطة/يوم · ${p.active===false?'متوقف':'نشط'}</div></div><div class="actions"><button class="btn-x" onclick="toggleProduct('${p.id}',${p.active!==false})">${p.active===false?'تفعيل':'إيقاف'}</button></div></div>`).join('')||'<div class="panel">لا توجد منتجات</div>'; } catch(e){console.error(e);} }
+window.toggleProduct=async function(id,active){await updateDoc(doc(db,'products',id),{active:!active,updatedAt:serverTimestamp()});loadProductsAdmin();toast('تم تحديث المنتج');};
+document.getElementById('productForm')?.addEventListener('submit',async e=>{e.preventDefault();const days=document.getElementById('prodDays').value.split(',').map(x=>x.trim()).filter(Boolean);await addDoc(collection(db,'products'),{name:document.getElementById('prodName').value.trim(),category:document.getElementById('prodCategory').value.trim(),description:document.getElementById('prodDesc').value.trim(),pricePerDay:Number(document.getElementById('prodPrice').value),minDays:Number(document.getElementById('prodMin').value||1),maxDays:Number(document.getElementById('prodMax').value||7),availableDays:days,active:true,createdAt:serverTimestamp()});e.target.reset();loadProductsAdmin();toast('تمت إضافة المنتج');});
+/* Orders */
+function renderOrders() {
+  document.getElementById('ordersList').innerHTML = orders.length ? orders.map(o => `
+    <div class="order-row">
+      <div class="m-left">
+        <div>
+          <div class="m-name">${o.title || o.productName || 'طلب'} <span class="st ${o.status}">${stLabel(o.status)}</span></div>
+          <div class="m-meta">${o.nickname || ''}${o.fromNickname ? ' → ' + o.fromNickname : ''} · ${o.orderId || o.docId}</div>
+          <div class="m-meta">${o.note || ''} · ${o.amount ? o.amount + ' نقطة' : ''}</div>
+        </div>
+      </div>
+      <div class="actions">
+        ${o.status === 'pending' ? `
+          <button class="btn-x ok" onclick="approveOrder('${o.docId}')">موافقة</button>
+          <button class="btn-x danger" onclick="rejectOrder('${o.docId}')">رفض</button>
+        ` : ''}
+        ${o.status === 'approved' || o.status === 'done' ? `<button class="btn-x" onclick="showTicket('${o.docId}')">التذكرة</button>` : ''}
+      </div>
+    </div>
+  `).join('') : '<div class="panel" style="text-align:center;color:var(--muted)">لا توجد طلبات</div>';
+  updateStats();
+}
+
+window.approveOrder = async function(docId) {
+  const o = orders.find(x => x.docId === docId);
+  if (!o || o.status !== 'pending') return;
+  try {
+    if (o.type === 'points_request' && o.fromUid) {
+      const requesterSnap = await getDoc(doc(db, 'members', o.uid));
+      const payerSnap = await getDoc(doc(db, 'members', o.fromUid));
+      if (!requesterSnap.exists() || !payerSnap.exists()) throw new Error('member-not-found');
+      const requester = requesterSnap.data(), payer = payerSnap.data(), amount = Number(o.amount);
+      if (requester.status !== 'active' || payer.status !== 'active') { toast('أحد الحسابين غير نشط'); return; }
+      if (!Number.isInteger(amount) || amount < 1 || Number(payer.balance || 0) < amount) { toast('رصيد الدافع غير كافٍ أو المبلغ غير صحيح'); return; }
+      const batch = writeBatch(db);
+      batch.update(doc(db, 'members', o.fromUid), { balance: increment(-amount), updatedAt: serverTimestamp() });
+      batch.update(doc(db, 'members', o.uid), { balance: increment(amount), updatedAt: serverTimestamp() });
+      const payerTx=doc(collection(db,'transactions')), receiverTx=doc(collection(db,'transactions'));
+      batch.set(payerTx, { uid:o.fromUid, name:'تحويل إلى '+(requester.nickname||o.nickname||o.uid), amount:-amount, relatedUid:o.uid, orderId:o.orderId, createdAt:serverTimestamp() });
+      batch.set(receiverTx, { uid:o.uid, name:'استلام من '+(payer.nickname||o.fromNickname||o.fromUid), amount, relatedUid:o.fromUid, orderId:o.orderId, createdAt:serverTimestamp() });
+      batch.update(doc(db, 'orders', docId), { status:'approved', approvedAt:serverTimestamp(), approvedBy:auth.currentUser.uid });
+      await batch.commit();
+    } else {
+      await updateDoc(doc(db, 'orders', docId), { status:'approved', approvedAt:serverTimestamp(), approvedBy:auth.currentUser.uid });
+    }
+    o.status='approved'; await addLog(`موافقة على ${o.orderId || docId} — ${o.nickname || ''}`); renderOrders(); showTicket(docId); toast('تمت الموافقة وتنفيذ العملية');
+  } catch (e) { console.error('فشل اعتماد الطلب:', e.code, e.message); toast('تعذر اعتماد الطلب'); }
+};
+window.rejectOrder = async function(docId) {
+  const o = orders.find(x => x.docId === docId);
+  if (!o || o.status !== 'pending') return;
+  const reason = prompt('سبب الرفض (اختياري):') || '';
+  try {
+    await updateDoc(doc(db, 'orders', docId), { status:'rejected', rejectReason:reason.trim(), rejectedAt:serverTimestamp(), rejectedBy:auth.currentUser.uid });
+    o.status='rejected'; o.rejectReason=reason.trim(); await addLog(`رفض ${o.orderId || docId}`); renderOrders(); toast('تم الرفض');
+  } catch (e) { console.error('فشل رفض الطلب:', e.code, e.message); toast('تعذر رفض الطلب'); }
+};
+
+window.showTicket = function(docId) {
+  const o = orders.find(x => x.docId === docId);
+  if (!o) return;
+  document.getElementById('ticketBox').innerHTML = `
+    <div class="ticket">
+      <div class="ticket-head">
+        <div class="ticket-logo">SHIRO BANK · TICKET</div>
+        <div class="ticket-id">${o.orderId || docId}</div>
+      </div>
+      <div class="ticket-row"><span>الطالب</span><b>${o.nickname || '—'}</b></div><div class="ticket-row"><span>الطرف الآخر</span><b>${o.fromNickname || '—'}</b></div>
+      <div class="ticket-row"><span>المنتج</span><b>${o.title || '—'}</b></div>
+      <div class="ticket-row"><span>الملاحظة</span><b>${o.note || '—'}</b></div>
+      <div class="ticket-row"><span>الحالة</span><b style="color:var(--success)">معتمد</b></div><div class="ticket-row"><span>سبب الرفض</span><b>${o.rejectReason || '—'}</b></div>
+      <div class="ticket-stamp">✓ تصريح معتمد من بنك المملكة</div>
+    </div>
+  `;
+  openM('ticket');
+};
+
+function renderLogs() {
+  const html = logs.length ? logs.map(l => `
+    <div class="log-item">
+      <div class="log-action">${l.action}</div>
+      <div class="log-meta">${l.createdAt?.toDate ? l.createdAt.toDate().toLocaleString('ar-EG') : 'الآن'}</div>
+    </div>
+  `).join('') : '<div style="color:var(--muted)">فارغ</div>';
+  document.getElementById('logsList').innerHTML = html;
+  document.getElementById('homeLogs').innerHTML = logs.slice(0, 5).map(l => `
+    <div class="log-item"><div class="log-action">${l.action}</div></div>
+  `).join('') || '<div style="color:var(--muted)">لا توجد عمليات بعد</div>';
+}
 </script>
 </body>
 </html>
