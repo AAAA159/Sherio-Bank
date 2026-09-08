@@ -163,6 +163,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <button class="nav-tab" data-sec="warnings">الإنذارات</button>
     <button class="nav-tab" data-sec="rules">القواعد</button>
     <button class="nav-tab" data-sec="orders">الطلبات <span class="dot" id="ordersDot" style="display:none"></span></button>
+    <button class="nav-tab" data-sec="store">المتجر</button>
     <button class="nav-tab" data-sec="logs">السجل</button>
   </div>
 </div>
@@ -239,6 +240,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   </div>
 </section>
 
+<section class="section" id="sec-store"><div class="wrap"><h1 class="page-title">إدارة المتجر</h1><p class="page-sub">الأقسام والمنتجات اليومية</p><div class="panel"><div class="panel-title">إضافة منتج</div><form id="productForm"><div class="form-group"><label class="form-label">اسم المنتج</label><input class="form-input" id="prodName" required></div><div class="form-group"><label class="form-label">القسم</label><input class="form-input" id="prodCategory" placeholder="زيارات" required></div><div class="form-group"><label class="form-label">الوصف</label><input class="form-input" id="prodDesc"></div><div class="form-group"><label class="form-label">سعر اليوم</label><input class="form-input" type="number" id="prodPrice" min="1" required></div><div class="form-group"><label class="form-label">أقل أيام</label><input class="form-input" type="number" id="prodMin" value="1" min="1"></div><div class="form-group"><label class="form-label">أقصى أيام</label><input class="form-input" type="number" id="prodMax" value="7" min="1"></div><div class="form-group"><label class="form-label">الأيام المتاحة (اختياري)</label><input class="form-input" id="prodDays" placeholder="friday,saturday"></div><button class="btn btn-primary">إضافة المنتج</button></form></div><div id="productsAdminList"></div></div></section>
+
 <section class="section" id="sec-orders">
   <div class="wrap">
     <h1 class="page-title">الطلبات</h1>
@@ -291,7 +294,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/fireba
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import {
   getFirestore, collection, getDocs, doc, getDoc, updateDoc, addDoc,
-  query, orderBy, limit, serverTimestamp, increment, setDoc
+  query, orderBy, limit, serverTimestamp, increment, setDoc, writeBatch
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -369,6 +372,7 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 
 async function loadAll() {
   await Promise.all([loadMembers(), loadOrders(), loadWarnings(), loadRules(), loadLogs()]);
+  await loadProductsAdmin();
   renderMembers();
   renderOrders();
   renderWarns();
@@ -651,6 +655,9 @@ document.getElementById('saveRulesBtn').addEventListener('click', async () => {
   toast('تم حفظ القواعد');
 });
 
+async function loadProductsAdmin(){ try { const snap=await getDocs(collection(db,'products')); const list=document.getElementById('productsAdminList'); const products=snap.docs.map(d=>({id:d.id,...d.data()})); list.innerHTML=products.map(p=>`<div class="order-row"><div><b>${p.name}</b><div class="m-meta">${p.category||''} · ${Number(p.pricePerDay||0).toLocaleString()} نقطة/يوم · ${p.active===false?'متوقف':'نشط'}</div></div><div class="actions"><button class="btn-x" onclick="toggleProduct('${p.id}',${p.active!==false})">${p.active===false?'تفعيل':'إيقاف'}</button></div></div>`).join('')||'<div class="panel">لا توجد منتجات</div>'; } catch(e){console.error(e);} }
+window.toggleProduct=async function(id,active){await updateDoc(doc(db,'products',id),{active:!active,updatedAt:serverTimestamp()});loadProductsAdmin();toast('تم تحديث المنتج');};
+document.getElementById('productForm')?.addEventListener('submit',async e=>{e.preventDefault();const days=document.getElementById('prodDays').value.split(',').map(x=>x.trim()).filter(Boolean);await addDoc(collection(db,'products'),{name:document.getElementById('prodName').value.trim(),category:document.getElementById('prodCategory').value.trim(),description:document.getElementById('prodDesc').value.trim(),pricePerDay:Number(document.getElementById('prodPrice').value),minDays:Number(document.getElementById('prodMin').value||1),maxDays:Number(document.getElementById('prodMax').value||7),availableDays:days,active:true,createdAt:serverTimestamp()});e.target.reset();loadProductsAdmin();toast('تمت إضافة المنتج');});
 /* Orders */
 function renderOrders() {
   document.getElementById('ordersList').innerHTML = orders.length ? orders.map(o => `
@@ -658,7 +665,7 @@ function renderOrders() {
       <div class="m-left">
         <div>
           <div class="m-name">${o.title || o.productName || 'طلب'} <span class="st ${o.status}">${stLabel(o.status)}</span></div>
-          <div class="m-meta">${o.nickname || ''} · ${o.orderId || o.docId}</div>
+          <div class="m-meta">${o.nickname || ''}${o.fromNickname ? ' → ' + o.fromNickname : ''} · ${o.orderId || o.docId}</div>
           <div class="m-meta">${o.note || ''} · ${o.amount ? o.amount + ' نقطة' : ''}</div>
         </div>
       </div>
@@ -676,26 +683,37 @@ function renderOrders() {
 
 window.approveOrder = async function(docId) {
   const o = orders.find(x => x.docId === docId);
-  if (!o) return;
-  await updateDoc(doc(db, 'orders', docId), {
-    status: 'approved',
-    approvedAt: serverTimestamp()
-  });
-  o.status = 'approved';
-  await addLog(`موافقة على ${o.orderId || docId} — ${o.nickname}`);
-  renderOrders();
-  showTicket(docId);
-  toast('تمت الموافقة');
+  if (!o || o.status !== 'pending') return;
+  try {
+    if (o.type === 'points_request' && o.fromUid) {
+      const requesterSnap = await getDoc(doc(db, 'members', o.uid));
+      const payerSnap = await getDoc(doc(db, 'members', o.fromUid));
+      if (!requesterSnap.exists() || !payerSnap.exists()) throw new Error('member-not-found');
+      const requester = requesterSnap.data(), payer = payerSnap.data(), amount = Number(o.amount);
+      if (requester.status !== 'active' || payer.status !== 'active') { toast('أحد الحسابين غير نشط'); return; }
+      if (!Number.isInteger(amount) || amount < 1 || Number(payer.balance || 0) < amount) { toast('رصيد الدافع غير كافٍ أو المبلغ غير صحيح'); return; }
+      const batch = writeBatch(db);
+      batch.update(doc(db, 'members', o.fromUid), { balance: increment(-amount), updatedAt: serverTimestamp() });
+      batch.update(doc(db, 'members', o.uid), { balance: increment(amount), updatedAt: serverTimestamp() });
+      const payerTx=doc(collection(db,'transactions')), receiverTx=doc(collection(db,'transactions'));
+      batch.set(payerTx, { uid:o.fromUid, name:'تحويل إلى '+(requester.nickname||o.nickname||o.uid), amount:-amount, relatedUid:o.uid, orderId:o.orderId, createdAt:serverTimestamp() });
+      batch.set(receiverTx, { uid:o.uid, name:'استلام من '+(payer.nickname||o.fromNickname||o.fromUid), amount, relatedUid:o.fromUid, orderId:o.orderId, createdAt:serverTimestamp() });
+      batch.update(doc(db, 'orders', docId), { status:'approved', approvedAt:serverTimestamp(), approvedBy:auth.currentUser.uid });
+      await batch.commit();
+    } else {
+      await updateDoc(doc(db, 'orders', docId), { status:'approved', approvedAt:serverTimestamp(), approvedBy:auth.currentUser.uid });
+    }
+    o.status='approved'; await addLog(`موافقة على ${o.orderId || docId} — ${o.nickname || ''}`); renderOrders(); showTicket(docId); toast('تمت الموافقة وتنفيذ العملية');
+  } catch (e) { console.error('فشل اعتماد الطلب:', e.code, e.message); toast('تعذر اعتماد الطلب'); }
 };
-
 window.rejectOrder = async function(docId) {
   const o = orders.find(x => x.docId === docId);
-  if (!o) return;
-  await updateDoc(doc(db, 'orders', docId), { status: 'rejected' });
-  o.status = 'rejected';
-  await addLog(`رفض ${o.orderId || docId}`);
-  renderOrders();
-  toast('تم الرفض');
+  if (!o || o.status !== 'pending') return;
+  const reason = prompt('سبب الرفض (اختياري):') || '';
+  try {
+    await updateDoc(doc(db, 'orders', docId), { status:'rejected', rejectReason:reason.trim(), rejectedAt:serverTimestamp(), rejectedBy:auth.currentUser.uid });
+    o.status='rejected'; o.rejectReason=reason.trim(); await addLog(`رفض ${o.orderId || docId}`); renderOrders(); toast('تم الرفض');
+  } catch (e) { console.error('فشل رفض الطلب:', e.code, e.message); toast('تعذر رفض الطلب'); }
 };
 
 window.showTicket = function(docId) {
@@ -707,10 +725,10 @@ window.showTicket = function(docId) {
         <div class="ticket-logo">SHIRO BANK · TICKET</div>
         <div class="ticket-id">${o.orderId || docId}</div>
       </div>
-      <div class="ticket-row"><span>العضو</span><b>${o.nickname || '—'}</b></div>
+      <div class="ticket-row"><span>الطالب</span><b>${o.nickname || '—'}</b></div><div class="ticket-row"><span>الطرف الآخر</span><b>${o.fromNickname || '—'}</b></div>
       <div class="ticket-row"><span>المنتج</span><b>${o.title || '—'}</b></div>
       <div class="ticket-row"><span>الملاحظة</span><b>${o.note || '—'}</b></div>
-      <div class="ticket-row"><span>الحالة</span><b style="color:var(--success)">معتمد</b></div>
+      <div class="ticket-row"><span>الحالة</span><b style="color:var(--success)">معتمد</b></div><div class="ticket-row"><span>سبب الرفض</span><b>${o.rejectReason || '—'}</b></div>
       <div class="ticket-stamp">✓ تصريح معتمد من بنك المملكة</div>
     </div>
   `;
