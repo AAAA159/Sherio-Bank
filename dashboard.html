@@ -987,64 +987,43 @@ window.handleRequestPoints = async function(e) {
     showToast('فشل إرسال الطلب');
   }
 };
-function renderStore() {
+async function renderStore() {
+  try {
+    const snap = await getDocs(collection(db, 'products'));
+    const now = new Date();
+    const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const todayName = dayNames[now.getDay()];
+    const products = snap.docs.map(d => ({id:d.id,...d.data()})).filter(p => p.active !== false && (!p.startsAt || new Date(p.startsAt) <= now) && (!p.endsAt || new Date(p.endsAt) >= now) && (!Array.isArray(p.availableDays) || !p.availableDays.length || p.availableDays.map(String).map(x => x.toLowerCase()).includes(todayName)));
+    storeItems = products.length ? products : storeItems;
+  } catch(e) { console.error('فشل تحميل منتجات المتجر:', e); }
   document.getElementById('storeGrid').innerHTML = storeItems.map(item => `
-    <div class="store-item">
-      <div class="store-emoji">${item.emoji}</div>
-      <div class="store-name">${item.name}</div>
-      <div class="store-desc">${item.desc}</div>
-      <div class="store-price">${item.price.toLocaleString()} نقطة</div>
-      <button class="btn-sm" onclick="openBuy('${item.id}')">طلب الآن</button>
-    </div>
-  `).join('');
+    <div class="store-item"><div class="store-emoji">${escapeHtml(item.emoji || '🛍️')}</div><div class="store-name">${escapeHtml(item.name)}</div><div class="store-desc">${escapeHtml(item.desc || item.description || '')}</div><div class="store-price">${Number(item.pricePerDay || item.price || 0).toLocaleString()} نقطة / يوم</div><button class="btn-sm" onclick="openBuy('${item.id}')">طلب الآن</button></div>`).join('');
 }
 window.openBuy = function(id) {
   currentBuyItem = storeItems.find(i => i.id === id);
+  if (!currentBuyItem) return;
   document.getElementById('buyTitle').textContent = currentBuyItem.name;
-  document.getElementById('buyDesc').textContent = currentBuyItem.desc + ' · ' + currentBuyItem.price.toLocaleString() + ' نقطة';
-  document.getElementById('buyNote').value = '';
-  openModal('buy');
+  const price = Number(currentBuyItem.pricePerDay || currentBuyItem.price || 0);
+  const min = Number(currentBuyItem.minDays || 1), max = Number(currentBuyItem.maxDays || 30);
+  document.getElementById('buyDesc').innerHTML = `${escapeHtml(currentBuyItem.desc || currentBuyItem.description || '')}<br>السعر: ${price.toLocaleString()} نقطة لليوم<div class="form-group" style="margin-top:12px"><label class="form-label">عدد الأيام</label><input class="form-input" type="number" id="buyDays" min="${min}" max="${max}" value="${min}" oninput="updateBuyTotal()"></div><div id="buyTotal" style="font-weight:700;color:var(--gold)"></div>`;
+  document.getElementById('buyNote').value = ''; openModal('buy'); updateBuyTotal();
 };
+window.updateBuyTotal = function() { if (!currentBuyItem) return; const days=Math.max(1,Number(document.getElementById('buyDays')?.value||1)); const price=Number(currentBuyItem.pricePerDay||currentBuyItem.price||0); const total=days*price; const el=document.getElementById('buyTotal'); if(el) el.textContent=`الإجمالي: ${total.toLocaleString()} نقطة`; };
 window.confirmBuy = async function() {
   if (!currentBuyItem) return;
-  if (currentBuyItem.price > balance) { showToast('الرصيد غير كافٍ'); return; }
-  const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
-  const note = document.getElementById('buyNote').value.trim();
+  const days = Number(document.getElementById('buyDays')?.value || 1), price=Number(currentBuyItem.pricePerDay||currentBuyItem.price||0), total=days*price;
+  const min=Number(currentBuyItem.minDays||1), max=Number(currentBuyItem.maxDays||30);
+  if (!Number.isInteger(days) || days<min || days>max) { showToast(`المدة يجب أن تكون بين ${min} و${max} يوم`); return; }
+  if (total > balance) { showToast('الرصيد غير كافٍ'); return; }
+  const orderId='ORD-'+Math.floor(100000+Math.random()*900000), note=document.getElementById('buyNote').value.trim();
   try {
-    await updateDoc(doc(db, 'members', currentUser.uid), {
-      balance: increment(-currentBuyItem.price),
-      updatedAt: serverTimestamp()
-    });
-    await addDoc(collection(db, 'transactions'), {
-      uid: currentUser.uid,
-      name: 'طلب: ' + currentBuyItem.name,
-      amount: -currentBuyItem.price,
-      createdAt: serverTimestamp()
-    });
-    await addDoc(collection(db, 'orders'), {
-      uid: currentUser.uid,
-      orderId,
-      title: currentBuyItem.name,
-      type: currentBuyItem.id,
-      amount: currentBuyItem.price,
-      note,
-      status: 'pending',
-      nickname: memberData.nickname,
-      createdAt: serverTimestamp()
-    });
-    balance -= currentBuyItem.price;
-    document.getElementById('balanceDisplay').textContent = balance.toLocaleString('en-US');
-    transactions.unshift({ name: 'طلب: ' + currentBuyItem.name, amount: -currentBuyItem.price, createdAt: new Date() });
-    orders.unshift({ orderId, title: currentBuyItem.name, status: 'pending', note, createdAt: new Date() });
-    renderHomeTx(); renderFullTx(); renderOrders();
-    closeModal('buy');
-    showToast('تم إنشاء الطلب · ' + orderId);
-    switchSection('orders');
-  } catch (e) {
-    showToast('فشل الطلب');
-  }
+    const batch=writeBatch(db), memberRef=doc(db,'members',currentUser.uid), txRef=doc(collection(db,'transactions')), orderRef=doc(collection(db,'orders'));
+    batch.update(memberRef,{balance:increment(-total),updatedAt:serverTimestamp()});
+    batch.set(txRef,{uid:currentUser.uid,name:'طلب: '+currentBuyItem.name,amount:-total,createdAt:serverTimestamp(),orderId});
+    batch.set(orderRef,{uid:currentUser.uid,orderId,title:currentBuyItem.name,type:'store',productId:currentBuyItem.id,amount:total,days,note,status:'pending',nickname:memberData.nickname,createdAt:serverTimestamp()});
+    await batch.commit(); balance-=total; document.getElementById('balanceDisplay').textContent=balance.toLocaleString('en-US'); transactions.unshift({id:txRef.id,name:'طلب: '+currentBuyItem.name,amount:-total,createdAt:new Date()}); orders.unshift({id:orderRef.id,orderId,title:currentBuyItem.name,status:'pending',note,createdAt:new Date()}); renderHomeTx();renderFullTx();renderOrders();closeModal('buy');showToast('تم إنشاء الطلب · '+orderId);switchSection('orders');
+  } catch(e) { console.error('فشل طلب المتجر:',e); showToast('فشل إنشاء الطلب'); }
 };
-
 function statusLabel(s) {
   return { pending: 'قيد الانتظار', processing: 'قيد المعالجة', done: 'مكتمل', rejected: 'مرفوض' }[s] || s;
 }
