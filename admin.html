@@ -159,6 +159,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   <div class="nav-tabs">
     <button class="nav-tab active" data-sec="home">نظرة عامة</button>
     <button class="nav-tab" data-sec="members">الأعضاء</button>
+    <button class="nav-tab" data-sec="guilds">النقابات</button>
+    <button class="nav-tab" data-sec="accounts">الحسابات</button>
+    <button class="nav-tab" data-sec="messages">الرسائل</button>
+    <button class="nav-tab" data-sec="deleted">المحذوفات</button>
     <button class="nav-tab" data-sec="points">النقاط</button>
     <button class="nav-tab" data-sec="warnings">الإنذارات</button>
     <button class="nav-tab" data-sec="rules">القواعد</button>
@@ -190,6 +194,11 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <div id="membersList"></div>
   </div>
 </section>
+
+<section class="section" id="sec-guilds"><div class="wrap"><h1 class="page-title">إدارة النقابات</h1><p class="page-sub">إضافة وتعديل وإيقاف واستعادة النقابات</p><div class="panel"><form id="guildForm"><div class="form-group"><label class="form-label">اسم النقابة</label><input class="form-input" id="guildName" required></div><div class="form-group"><label class="form-label">الوصف</label><input class="form-input" id="guildDesc"></div><button class="btn btn-primary">إضافة نقابة</button></form></div><div id="guildsAdminList"></div></div></section>
+<section class="section" id="sec-accounts"><div class="wrap"><h1 class="page-title">الحسابات</h1><p class="page-sub">الأعضاء وحالة الحساب والنقابة</p><div class="search-bar"><input id="accountSearch" placeholder="ابحث بالاسم أو المعرف أو النقابة..." oninput="renderAccountsAdmin()"></div><div id="accountsAdminList"></div></div></section>
+<section class="section" id="sec-messages"><div class="wrap"><h1 class="page-title">الرسائل</h1><p class="page-sub">كل رسالة في بطاقة مستقلة مع حذف منفصل</p><div id="messagesAdminList"></div></div></section>
+<section class="section" id="sec-deleted"><div class="wrap"><h1 class="page-title">المحذوفات</h1><p class="page-sub">النقابات المحذوفة مؤقتًا وإمكانية استعادتها خلال 48 ساعة</p><div id="deletedGuildsList"></div></div></section>
 
 <section class="section" id="sec-points">
   <div class="wrap">
@@ -240,7 +249,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   </div>
 </section>
 
-<section class="section" id="sec-store"><div class="wrap"><h1 class="page-title">إدارة المتجر</h1><p class="page-sub">الأقسام والمنتجات اليومية</p><div class="panel"><div class="panel-title">إضافة منتج</div><form id="productForm"><div class="form-group"><label class="form-label">اسم المنتج</label><input class="form-input" id="prodName" required></div><div class="form-group"><label class="form-label">القسم</label><input class="form-input" id="prodCategory" placeholder="زيارات" required></div><div class="form-group"><label class="form-label">الوصف</label><input class="form-input" id="prodDesc"></div><div class="form-group"><label class="form-label">سعر اليوم</label><input class="form-input" type="number" id="prodPrice" min="1" required></div><div class="form-group"><label class="form-label">أقل أيام</label><input class="form-input" type="number" id="prodMin" value="1" min="1"></div><div class="form-group"><label class="form-label">أقصى أيام</label><input class="form-input" type="number" id="prodMax" value="7" min="1"></div><div class="form-group"><label class="form-label">الأيام المتاحة (اختياري)</label><input class="form-input" id="prodDays" placeholder="friday,saturday"></div><button class="btn btn-primary">إضافة المنتج</button></form></div><div id="productsAdminList"></div></div></section>
+<section class="section" id="sec-store"><div class="wrap"><h1 class="page-title">إدارة المتجر</h1><p class="page-sub">المنتج ثم قائمة فروعه والوجهات المتاحة</p><div class="panel"><div class="panel-title">إضافة منتج</div><form id="productForm"><div class="form-group"><label class="form-label">اسم المنتج</label><input class="form-input" id="prodName" required></div><div class="form-group"><label class="form-label">الفروع / الوجهات</label><div id="productBranches"><input class="form-input prodBranch" placeholder="مثال: Anime Arab" required></div><button type="button" class="btn btn-ghost" onclick="addProductBranch()">+ إضافة فرع آخر</button></div><div class="form-group"><label class="form-label">الوصف</label><input class="form-input" id="prodDesc"></div><div class="form-group"><label class="form-label">سعر اليوم</label><input class="form-input" type="number" id="prodPrice" min="1" required></div><div class="form-group"><label class="form-label">أقل أيام</label><input class="form-input" type="number" id="prodMin" value="1" min="1"></div><div class="form-group"><label class="form-label">أقصى أيام</label><input class="form-input" type="number" id="prodMax" value="7" min="1"></div><div class="form-group"><label class="form-label">أيام تشغيل المنتج</label><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px"><label><input type="checkbox" name="prodDay" value="saturday"> السبت</label><label><input type="checkbox" name="prodDay" value="sunday"> الأحد</label><label><input type="checkbox" name="prodDay" value="monday"> الاثنين</label><label><input type="checkbox" name="prodDay" value="tuesday"> الثلاثاء</label><label><input type="checkbox" name="prodDay" value="wednesday"> الأربعاء</label><label><input type="checkbox" name="prodDay" value="thursday"> الخميس</label><label><input type="checkbox" name="prodDay" value="friday"> الجمعة</label></div><small style="color:var(--muted)">لو لم تختر يومًا، المنتج يعمل كل الأيام.</small></div><button class="btn btn-primary">إضافة المنتج</button></form></div><div id="productsAdminList"></div></div></section>
 
 <section class="section" id="sec-orders">
   <div class="wrap">
@@ -294,7 +303,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/fireba
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import {
   getFirestore, collection, getDocs, doc, getDoc, updateDoc, addDoc,
-  query, orderBy, limit, serverTimestamp, increment, setDoc, writeBatch
+  query, where, orderBy, limit, serverTimestamp, increment, setDoc, writeBatch, deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -373,6 +382,10 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 async function loadAll() {
   await Promise.all([loadMembers(), loadOrders(), loadWarnings(), loadRules(), loadLogs()]);
   await loadProductsAdmin();
+  await loadGuildAdminData();
+  await loadMessagesAdmin();
+  renderDeletedGuilds();
+  renderAccountsAdmin();
   renderMembers();
   renderOrders();
   renderWarns();
@@ -655,9 +668,44 @@ document.getElementById('saveRulesBtn').addEventListener('click', async () => {
   toast('تم حفظ القواعد');
 });
 
-async function loadProductsAdmin(){ try { const snap=await getDocs(collection(db,'products')); const list=document.getElementById('productsAdminList'); const products=snap.docs.map(d=>({id:d.id,...d.data()})); list.innerHTML=products.map(p=>`<div class="order-row"><div><b>${p.name}</b><div class="m-meta">${p.category||''} · ${Number(p.pricePerDay||0).toLocaleString()} نقطة/يوم · ${p.active===false?'متوقف':'نشط'}</div></div><div class="actions"><button class="btn-x" onclick="toggleProduct('${p.id}',${p.active!==false})">${p.active===false?'تفعيل':'إيقاف'}</button></div></div>`).join('')||'<div class="panel">لا توجد منتجات</div>'; } catch(e){console.error(e);} }
+async function loadProductsAdmin(){ try { const snap=await getDocs(collection(db,'products')); const list=document.getElementById('productsAdminList'); const products=snap.docs.map(d=>({id:d.id,...d.data()})); list.innerHTML=products.map(p=>`<div class="order-row"><div><b>${p.name}</b><div class="m-meta">الفروع: ${(p.branches||[]).join('، ')||'بدون فروع'} · ${Number(p.pricePerDay||0).toLocaleString()} نقطة/يوم · ${(p.availableDays||[]).join('، ')||'كل الأيام'} · ${p.active===false?'متوقف':'نشط'}</div></div><div class="actions"><button class="btn-x" onclick="toggleProduct('${p.id}',${p.active!==false})">${p.active===false?'تفعيل':'إيقاف'}</button></div></div>`).join('')||'<div class="panel">لا توجد منتجات</div>'; } catch(e){console.error(e);} }
+window.addProductBranch=function(){const box=document.getElementById('productBranches');const input=document.createElement('input');input.className='form-input prodBranch';input.placeholder='اسم فرع أو وجهة أخرى';input.required=true;input.style.marginTop='8px';box.appendChild(input);};
 window.toggleProduct=async function(id,active){await updateDoc(doc(db,'products',id),{active:!active,updatedAt:serverTimestamp()});loadProductsAdmin();toast('تم تحديث المنتج');};
-document.getElementById('productForm')?.addEventListener('submit',async e=>{e.preventDefault();const days=document.getElementById('prodDays').value.split(',').map(x=>x.trim()).filter(Boolean);await addDoc(collection(db,'products'),{name:document.getElementById('prodName').value.trim(),category:document.getElementById('prodCategory').value.trim(),description:document.getElementById('prodDesc').value.trim(),pricePerDay:Number(document.getElementById('prodPrice').value),minDays:Number(document.getElementById('prodMin').value||1),maxDays:Number(document.getElementById('prodMax').value||7),availableDays:days,active:true,createdAt:serverTimestamp()});e.target.reset();loadProductsAdmin();toast('تمت إضافة المنتج');});
+document.getElementById('productForm')?.addEventListener('submit',async e=>{e.preventDefault();const days=[...document.querySelectorAll('input[name="prodDay"]:checked')].map(x=>x.value);const branches=[...document.querySelectorAll('.prodBranch')].map(x=>x.value.trim()).filter(Boolean);if(!branches.length){toast('أضف فرعًا واحدًا على الأقل');return;}await addDoc(collection(db,'products'),{name:document.getElementById('prodName').value.trim(),branches,description:document.getElementById('prodDesc').value.trim(),pricePerDay:Number(document.getElementById('prodPrice').value),minDays:Number(document.getElementById('prodMin').value||1),maxDays:Number(document.getElementById('prodMax').value||7),availableDays:days,active:true,createdAt:serverTimestamp()});e.target.reset();document.getElementById('productBranches').innerHTML='<input class="form-input prodBranch" placeholder="مثال: Anime Arab" required>';loadProductsAdmin();toast('تمت إضافة المنتج');});
+let guildRecords = [];
+let messageRecords = [];
+
+async function loadGuildAdminData(){
+  try { const snap=await getDocs(collection(db,'guilds')); guildRecords=snap.docs.map(d=>({id:d.id,...d.data()})); }
+  catch(e){ console.error('فشل تحميل النقابات',e); guildRecords=[]; }
+  renderGuildsAdmin();
+}
+async function loadMessagesAdmin(){
+  try { const snap=await getDocs(query(collection(db,'messages'),orderBy('createdAt','desc'),limit(100))); messageRecords=snap.docs.map(d=>({id:d.id,...d.data()})); }
+  catch(e){ console.error('فشل تحميل الرسائل',e); messageRecords=[]; }
+  renderMessagesAdmin();
+}
+function renderGuildsAdmin(){
+ const el=document.getElementById('guildsAdminList'); if(!el)return;
+ el.innerHTML=guildRecords.filter(g=>g.status!=='deleted_pending'&&g.status!=='closed').map(g=>`<div class="member-row"><div><div class="m-name">${g.name||'—'}</div><div class="m-meta">${g.description||''} · ${g.status||'active'}</div></div><div class="actions"><button class="btn-x" onclick="renameGuild('${g.id}')">تعديل</button><button class="btn-x warn" onclick="removeGuild('${g.id}')">حذف مؤقت</button></div></div>`).join('')||'<div class="panel">لا توجد نقابات</div>';
+}
+function renderDeletedGuilds(){
+ const el=document.getElementById('deletedGuildsList'); if(!el)return;
+ const deleted=guildRecords.filter(g=>g.status==='deleted_pending'||g.status==='closed');
+ el.innerHTML=deleted.map(g=>`<div class="member-row closed"><div><div class="m-name">${g.name||'—'}</div><div class="m-meta">الحالة: ${g.status} · إغلاق الأعضاء: ${g.closeMembersAt?.toDate?g.closeMembersAt.toDate().toLocaleString('ar-EG'):'خلال 48 ساعة'}</div></div><div class="actions">${g.status==='deleted_pending'?`<button class="btn-x ok" onclick="restoreGuild('${g.id}')">استعادة</button>`:'<span class="st closed">مغلقة نهائيًا</span>'}</div></div>`).join('')||'<div class="panel">لا توجد نقابات محذوفة</div>';
+}
+window.renameGuild=async function(id){const g=guildRecords.find(x=>x.id===id); if(!g)return; const name=prompt('اسم النقابة الجديد:',g.name||''); if(!name||!name.trim())return; await updateDoc(doc(db,'guilds',id),{name:name.trim(),updatedAt:serverTimestamp()}); await addLog('تعديل اسم نقابة '+g.name); loadGuildAdminData(); toast('تم تعديل النقابة');};
+window.removeGuild=async function(id){const g=guildRecords.find(x=>x.id===id); if(!g)return; if(!confirm('سيتم إخفاء النقابة وبدء مهلة 48 ساعة للأعضاء. متابعة؟'))return; const closeAt=new Date(Date.now()+48*60*60*1000); await updateDoc(doc(db,'guilds',id),{status:'deleted_pending',deletedAt:serverTimestamp(),closeMembersAt:closeAt.toISOString()}); await addLog('حذف مؤقت للنقابة '+g.name); loadGuildAdminData(); renderDeletedGuilds(); toast('بدأت مهلة 48 ساعة');};
+window.restoreGuild=async function(id){const g=guildRecords.find(x=>x.id===id); if(!g)return; await updateDoc(doc(db,'guilds',id),{status:'active',deletedAt:null,closeMembersAt:null,restoredAt:serverTimestamp()}); await addLog('استعادة نقابة '+g.name); loadGuildAdminData(); renderDeletedGuilds(); toast('تمت استعادة النقابة');};
+
+document.getElementById('guildForm')?.addEventListener('submit',async e=>{e.preventDefault();const name=document.getElementById('guildName').value.trim();const description=document.getElementById('guildDesc').value.trim();if(!name)return;await addDoc(collection(db,'guilds'),{name,description,status:'active',createdAt:serverTimestamp()});e.target.reset();await addLog('إضافة نقابة '+name);loadGuildAdminData();toast('تمت إضافة النقابة');});
+function renderAccountsAdmin(){const el=document.getElementById('accountsAdminList');if(!el)return;const q=(document.getElementById('accountSearch')?.value||'').toLowerCase();const list=members.filter(m=>[m.nickname,m.memberId,m.guild,m.email].some(v=>String(v||'').toLowerCase().includes(q)));el.innerHTML=list.map(m=>`<div class="member-row ${m.status||'active'}"><div class="m-left"><div class="m-avatar">${(m.nickname||'?')[0]}</div><div><div class="m-name">${m.nickname||'عضو'} <span class="st ${m.status||'active'}">${stLabel(m.status||'active')}</span></div><div class="m-meta">${m.memberId||'—'} · ${m.guild||'بدون نقابة'} · ${Number(m.balance||0).toLocaleString()} نقطة</div></div></div><div class="actions"><button class="btn-x" onclick="showMember('${m.id||m.uid}')">تفاصيل</button></div></div>`).join('')||'<div class="panel">لا توجد حسابات</div>';}
+window.showMember=async function(uid){const m=members.find(x=>(x.id||x.uid)===uid);if(m)alert(`الاسم: ${m.nickname||'—'}\nالمعرف: ${m.memberId||'—'}\nالنقابة: ${m.guild||'—'}\nالحالة: ${stLabel(m.status||'active')}\nالرصيد: ${Number(m.balance||0).toLocaleString()}`);};
+function renderMessagesAdmin(){const el=document.getElementById('messagesAdminList');if(!el)return;el.innerHTML=messageRecords.map(m=>`<div class="panel"><div class="m-name">${m.title||m.subject||'رسالة'}</div><div class="m-meta">${m.nickname||m.uid||''} · ${m.createdAt?.toDate?m.createdAt.toDate().toLocaleString('ar-EG'):'—'}</div><p style="margin-top:8px;font-size:13px">${m.body||m.message||m.text||''}</p><button class="btn-x danger" onclick="deleteMessage('${m.id}')">حذف الرسالة</button></div>`).join('')||'<div class="panel">لا توجد رسائل</div>';}
+function requireDeleteCode(){return prompt('أدخل كود تأكيد الحذف:') === '1322010';}
+window.deleteMessage=async function(id){if(!requireDeleteCode())return;if(!confirm('حذف هذه الرسالة فقط؟'))return;await deleteDoc(doc(db,'messages',id));await addLog('حذف رسالة '+id);messageRecords=messageRecords.filter(m=>m.id!==id);renderMessagesAdmin();toast('تم حذف الرسالة');};
+window.deleteOneLog=async function(id){if(!id||!requireDeleteCode())return;if(!confirm('حذف هذا السجل فقط؟'))return;await deleteDoc(doc(db,'adminLogs',id));logs=logs.filter(l=>l.id!==id);renderLogs();toast('تم حذف السجل');};
+window.deleteAllLogs=async function(){if(!requireDeleteCode())return;if(!confirm('حذف سجل الأدمن بالكامل؟'))return;const snap=await getDocs(collection(db,'adminLogs'));const batch=writeBatch(db);snap.docs.forEach(d=>batch.delete(d.ref));await batch.commit();logs=[];renderLogs();toast('تم حذف السجل بالكامل');};
 /* Orders */
 function renderOrders() {
   document.getElementById('ordersList').innerHTML = orders.length ? orders.map(o => `
@@ -736,10 +784,11 @@ window.showTicket = function(docId) {
 };
 
 function renderLogs() {
-  const html = logs.length ? logs.map(l => `
+  const html = logs.length ? `<div class="actions" style="margin-bottom:10px"><button class="btn-x danger" onclick="deleteAllLogs()">حذف السجل كاملًا</button></div>` + logs.map(l => `
     <div class="log-item">
       <div class="log-action">${l.action}</div>
       <div class="log-meta">${l.createdAt?.toDate ? l.createdAt.toDate().toLocaleString('ar-EG') : 'الآن'}</div>
+      ${l.id ? `<button class="btn-x danger" onclick="deleteOneLog('${l.id}')">حذف هذا السجل</button>` : ''}
     </div>
   `).join('') : '<div style="color:var(--muted)">فارغ</div>';
   document.getElementById('logsList').innerHTML = html;
