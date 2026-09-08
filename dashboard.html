@@ -346,6 +346,8 @@ body::before {
     <button class="nav-tab" data-section="orders">طلباتي</button>
     <button class="nav-tab" data-section="history">السجل</button>
     <button class="nav-tab" data-section="settings">الإعدادات</button>
+    <button class="nav-tab" data-section="alerts">إنذاراتي</button>
+    <button class="nav-tab" data-section="rankings">الترتيب</button>
   </div>
 
   <!-- HOME -->
@@ -419,6 +421,10 @@ body::before {
       <div class="page-title">طلباتي</div>
       <div class="page-sub">تتبع حالة طلباتك</div>
     </div>
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">الطلبات الواردة</div><span class="panel-link" id="incomingCount"></span></div>
+      <div id="incomingOrdersList"></div>
+    </div>
     <div id="ordersList"></div>
   </section>
 
@@ -469,6 +475,26 @@ body::before {
     </div>
   </section>
 </div>
+
+  <!-- ALERTS -->
+  <section class="section" id="sec-alerts">
+    <div class="page-head"><div class="page-title">إنذاراتي</div><div class="page-sub">الإنذارات المسجلة على حسابك</div></div>
+    <div class="panel"><div class="panel-title" id="myWarningsSummary">جاري التحميل...</div><div id="myWarningsList"></div></div>
+  </section>
+
+  <!-- RANKINGS -->
+  <section class="section" id="sec-rankings">
+    <div class="page-head"><div class="page-title">الترتيب والإحصائيات</div><div class="page-sub">بيانات مباشرة من الأعضاء والعمليات</div></div>
+    <div class="grid-2">
+      <div class="panel"><div class="panel-title">أغنى 10 أعضاء</div><div id="richestList"></div></div>
+      <div class="panel"><div class="panel-title">النقابات حسب إجمالي النقاط</div><div id="guildWealthList"></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="panel"><div class="panel-title">النقابات حسب عدد الأعضاء</div><div id="guildMembersList"></div></div>
+      <div class="panel"><div class="panel-title">النقابات حسب عدد الإنذارات</div><div id="guildWarningsList"></div></div>
+    </div>
+    <div class="panel"><div class="panel-title">حركة نقاط حسابي</div><canvas id="myActivityChart" height="180"></canvas><div id="chartEmpty" style="text-align:center;color:var(--muted);padding:20px;display:none">لا توجد عمليات كافية للرسم</div></div>
+  </section>
 
 <!-- Modals -->
 <div class="modal-overlay" id="modal-transfer">
@@ -560,6 +586,7 @@ let dailyClaimed = false;
 let currentBuyItem = null;
 let transactions = [];
 let orders = [];
+let incomingOrders = [];
 
 const storeItems = [
   { id: 'visit', emoji: '🏰', name: 'زيارة المملكة', desc: 'طلب زيارة رسمية', price: 500 },
@@ -632,6 +659,8 @@ async function loadMember(uid) {
 
   await loadTransactions(uid);
   await loadOrders(uid);
+  await loadMyWarnings(uid);
+  await loadRankings();
   renderStore();
 }
 
@@ -656,20 +685,15 @@ async function loadTransactions(uid) {
 }
 async function loadOrders(uid) {
   try {
-    const q = query(
-      collection(db, 'orders'),
-      where('uid', '==', uid),
-      orderBy('createdAt', 'desc'),
-      limit(20)
-    );
-    const snap = await getDocs(q);
-    orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const snap = await getDocs(collection(db, 'orders'));
+    orders = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(o => o.uid === uid);
+    incomingOrders = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(o => o.fromUid === uid);
   } catch (e) {
-    orders = [];
+    console.error('فشل تحميل الطلبات:', e.code, e.message);
+    orders = []; incomingOrders = [];
   }
-  renderOrders();
+  renderOrders(); renderIncomingOrders();
 }
-
 async function saveBalance(newBalance, txName, amount) {
   const memberRef = doc(db, 'members', currentUser.uid);
   const txRef = doc(collection(db, 'transactions'));
@@ -758,6 +782,58 @@ window.previewMember = async function(type) {
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
 }
+async function loadMyWarnings(uid) {
+  try {
+    const snap = await getDocs(query(collection(db, 'warnings'), where('uid', '==', uid), limit(50)));
+    const warnings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    document.getElementById('myWarningsSummary').textContent = `عدد الإنذارات: ${warnings.length}`;
+    document.getElementById('myWarningsList').innerHTML = warnings.length ? warnings.map(w => `<div class="order-card"><b>${escapeHtml(w.reason || 'إنذار')}</b><div class="order-meta">${formatDate(w.createdAt)}${w.action ? ' · الإجراء: ' + escapeHtml(w.action) : ''}</div></div>`).join('') : '<div style="text-align:center;color:var(--muted);padding:16px">لا توجد إنذارات على حسابك</div>';
+  } catch (e) { console.error('فشل تحميل الإنذارات:', e); document.getElementById('myWarningsSummary').textContent = 'تعذر تحميل الإنذارات'; }
+}
+
+async function loadRankings() {
+  try {
+    const membersSnap = await getDocs(collection(db, 'members'));
+    const all = membersSnap.docs.map(d => ({ uid: d.id, ...d.data() })).filter(m => m.status === 'active');
+    const warningsSnap = await getDocs(collection(db, 'warnings'));
+    const warnings = warningsSnap.docs.map(d => d.data());
+    const guilds = {};
+    all.forEach(m => { const g = m.guild || 'بدون نقابة'; guilds[g] ||= { name:g, balance:0, members:0, warnings:0 }; guilds[g].balance += Number(m.balance||0); guilds[g].members++; });
+    warnings.forEach(w => { const m = all.find(x => x.uid === w.uid); if (m) guilds[m.guild || 'بدون نقابة'].warnings++; });
+    const top = (arr, field) => arr.sort((a,b) => b[field]-a[field]).slice(0,10);
+    const row = (label, value, extra='') => `<div class="tx-item"><div><b>${escapeHtml(label)}</b><div class="tx-date">${escapeHtml(extra)}</div></div><b class="tx-amount pos">${Number(value).toLocaleString()}</b></div>`;
+    document.getElementById('richestList').innerHTML = top([...all], 'balance').map((m,i)=>row('#'+(i+1)+' '+(m.nickname||'عضو'), m.balance||0, `${m.memberId||''} · ${m.guild||'بدون نقابة'}`)).join('') || '<div class="order-meta">لا توجد بيانات</div>';
+    document.getElementById('guildWealthList').innerHTML = top(Object.values(guilds), 'balance').map((g,i)=>row('#'+(i+1)+' '+g.name,g.balance,`${g.members} أعضاء`)).join('') || '<div class="order-meta">لا توجد بيانات</div>';
+    document.getElementById('guildMembersList').innerHTML = top(Object.values(guilds), 'members').map((g,i)=>row('#'+(i+1)+' '+g.name,g.members,'عضو')).join('') || '<div class="order-meta">لا توجد بيانات</div>';
+    document.getElementById('guildWarningsList').innerHTML = top(Object.values(guilds), 'warnings').map((g,i)=>row('#'+(i+1)+' '+g.name,g.warnings,'إنذار')).join('') || '<div class="order-meta">لا توجد بيانات</div>';
+    drawActivityChart();
+  } catch (e) { console.error('فشل تحميل الترتيبات:', e); }
+}
+
+function drawActivityChart() {
+  const canvas = document.getElementById('myActivityChart'), empty = document.getElementById('chartEmpty');
+  if (!canvas) return;
+  const ctx=canvas.getContext('2d'), data=transactions.slice(0,14).reverse();
+  if (!data.length) { canvas.style.display='none'; empty.style.display='block'; return; }
+  canvas.style.display='block'; empty.style.display='none';
+  const w=canvas.clientWidth||600, h=180, dpr=window.devicePixelRatio||1; canvas.width=w*dpr; canvas.height=h*dpr; ctx.scale(dpr,dpr); ctx.clearRect(0,0,w,h);
+  const max=Math.max(...data.map(x=>Math.abs(Number(x.amount)||0)),1), step=w/Math.max(data.length-1,1);
+  ctx.strokeStyle='#00d4ff'; ctx.lineWidth=2; ctx.beginPath(); data.forEach((x,i)=>{ const y= h/2-(Number(x.amount)||0)/max*(h*.38), px=i*step; i?ctx.lineTo(px,y):ctx.moveTo(px,y); }); ctx.stroke();
+  ctx.fillStyle='#7a8a9e'; ctx.font='10px Cairo'; ctx.fillText('الموجب أعلى / السالب أسفل', 8, 14);
+}
+
+window.showMemberTicket = function(id) {
+  const o = incomingOrders.find(x=>x.id===id) || orders.find(x=>x.id===id);
+  if (!o || o.status !== 'approved') return;
+  const old = document.getElementById('memberTicketOverlay');
+  if (old) old.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'memberTicketOverlay';
+  overlay.className = 'modal-overlay open';
+  overlay.innerHTML = `<div class="modal"><div class="modal-header"><div class="modal-title">تذكرة معتمدة</div><button class="modal-close" onclick="document.getElementById('memberTicketOverlay').remove()">✕</button></div><div class="ticket" style="background:linear-gradient(145deg,#122536,#0c1a28);border:1px solid var(--border);border-radius:14px;padding:16px"><div style="display:flex;justify-content:space-between;direction:ltr;margin-bottom:14px"><b>SHIRO BANK · TICKET</b><b>${escapeHtml(o.orderId || id)}</b></div><div class="order-meta">الطالب: ${escapeHtml(o.nickname || '—')}</div><div class="order-meta">المبلغ: ${Number(o.amount || 0).toLocaleString()} نقطة</div><div class="order-meta">السبب: ${escapeHtml(o.note || '—')}</div><div style="color:var(--success);font-weight:700;text-align:center;margin-top:12px">✓ عملية معتمدة</div></div><button class="btn btn-primary" onclick="window.print()">طباعة / حفظ</button></div>`;
+  document.body.appendChild(overlay);
+};
+
 /* ========== UI helpers ========== */
 window.showToast = function(msg) {
   document.getElementById('toastMsg').textContent = msg;
@@ -972,6 +1048,61 @@ window.confirmBuy = async function() {
 function statusLabel(s) {
   return { pending: 'قيد الانتظار', processing: 'قيد المعالجة', done: 'مكتمل', rejected: 'مرفوض' }[s] || s;
 }
+function renderIncomingOrders() {
+  const list = document.getElementById('incomingOrdersList');
+  const count = document.getElementById('incomingCount');
+  const pending = incomingOrders.filter(o => o.status === 'pending');
+  if (count) count.textContent = pending.length ? `${pending.length} معلّق` : '';
+  if (!list) return;
+  list.innerHTML = incomingOrders.length ? incomingOrders.map(o => `
+    <div class="order-card">
+      <div class="order-top"><div class="order-id">${escapeHtml(o.orderId || o.id)}</div><span class="order-status ${escapeHtml(o.status)}">${statusLabel(o.status)}</span></div>
+      <div class="order-title">طلب من ${escapeHtml(o.nickname || o.uid)}</div>
+      <div class="order-meta">${Number(o.amount || 0).toLocaleString()} نقطة · ${escapeHtml(o.note || 'بدون سبب')}</div>
+      ${o.status === 'pending' ? `<button class="btn btn-primary" onclick="approveIncoming('${o.id}')">موافقة وتحويل النقاط</button><button class="btn btn-ghost" onclick="rejectIncoming('${o.id}')">رفض</button>` : ''}
+      ${o.status === 'approved' ? `<button class="btn btn-ghost" onclick="showMemberTicket('${o.id}')">التذكرة</button>` : ''}
+      ${o.status === 'rejected' && o.rejectReason ? `<div class="order-meta">سبب الرفض: ${escapeHtml(o.rejectReason)}</div>` : ''}
+    </div>`).join('') : '<div style="text-align:center;color:var(--muted);padding:16px">لا توجد طلبات واردة</div>';
+}
+
+window.approveIncoming = async function(orderDocId) {
+  const order = incomingOrders.find(o => o.id === orderDocId);
+  if (!order || order.status !== 'pending') return;
+  const amount = Number(order.amount);
+  if (!Number.isInteger(amount) || amount < 1) { showToast('مبلغ الطلب غير صحيح'); return; }
+  try {
+    const senderSnap = await getDoc(doc(db, 'members', order.uid));
+    const receiverSnap = await getDoc(doc(db, 'members', currentUser.uid));
+    if (!senderSnap.exists() || !receiverSnap.exists()) throw new Error('member-not-found');
+    const sender = senderSnap.data(), receiver = receiverSnap.data();
+    if (sender.status !== 'active' || receiver.status !== 'active') { showToast('أحد الحسابين غير نشط'); return; }
+    if (Number(receiver.balance || 0) < amount) { showToast('رصيدك غير كافٍ'); return; }
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'members', currentUser.uid), { balance: increment(-amount), updatedAt: serverTimestamp() });
+    batch.update(doc(db, 'members', order.uid), { balance: increment(amount), updatedAt: serverTimestamp() });
+    const outgoingTx = doc(collection(db, 'transactions'));
+    const incomingTx = doc(collection(db, 'transactions'));
+    batch.set(outgoingTx, { uid: currentUser.uid, name: 'تحويل إلى ' + (sender.nickname || sender.memberId), amount: -amount, relatedUid: order.uid, orderId: order.orderId, createdAt: serverTimestamp() });
+    batch.set(incomingTx, { uid: order.uid, name: 'استلام من ' + (receiver.nickname || receiver.memberId), amount, relatedUid: currentUser.uid, orderId: order.orderId, createdAt: serverTimestamp() });
+    batch.update(doc(db, 'orders', orderDocId), { status: 'approved', approvedAt: serverTimestamp(), approvedBy: currentUser.uid });
+    await batch.commit();
+    balance -= amount; memberData.balance = balance; order.status = 'approved';
+    incomingOrders = incomingOrders.map(o => o.id === orderDocId ? order : o);
+    renderIncomingOrders(); document.getElementById('balanceDisplay').textContent = balance.toLocaleString('en-US');
+    showToast('تمت الموافقة وتحويل النقاط');
+  } catch (e) { console.error('فشل اعتماد الطلب:', e); showToast('تعذر اعتماد الطلب'); }
+};
+
+window.rejectIncoming = async function(orderDocId) {
+  const order = incomingOrders.find(o => o.id === orderDocId);
+  if (!order || order.status !== 'pending') return;
+  const reason = prompt('سبب الرفض (اختياري):') || '';
+  try {
+    await updateDoc(doc(db, 'orders', orderDocId), { status: 'rejected', rejectReason: reason.trim(), rejectedAt: serverTimestamp(), rejectedBy: currentUser.uid });
+    order.status = 'rejected'; order.rejectReason = reason.trim(); renderIncomingOrders(); showToast('تم رفض الطلب');
+  } catch (e) { console.error('فشل رفض الطلب:', e); showToast('تعذر رفض الطلب'); }
+};
+
 function renderOrders() {
   const list = document.getElementById('ordersList');
   if (!orders.length) {
@@ -986,6 +1117,7 @@ function renderOrders() {
       </div>
       <div class="order-title">${o.title}</div>
       <div class="order-meta">${formatDate(o.createdAt)}${o.note ? ' · ' + o.note : ''}</div>
+      ${o.status === 'approved' ? `<button class="btn btn-ghost" onclick="showMemberTicket('${o.id}')">التذكرة المعتمدة</button>` : ''}
     </div>
   `).join('');
 }
